@@ -2,8 +2,10 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import Home from './src/pages/home';
 import Exames from './src/pages/exames';
+import Paciente from './src/pages/cadastroPaciente';
 
 const Tab = createBottomTabNavigator();
 
@@ -13,6 +15,7 @@ export default function App() {
       <Tab.Navigator>
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Exames" component={Exames} />
+        <Tab.Screen name="Paciente" component={Paciente} />
       </Tab.Navigator>
     </NavigationContainer>
   );

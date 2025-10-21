@@ -1,7 +1,18 @@
+import React, { useState } from "react";
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 
 export function Paciente() {
+
+  const [paciente, setPaciente] = useState({
+    nome: "Danieli de Campos",
+    telefone: "(11) 91234-5678",
+    email: "dani@gmsil.com",
+    dataNascimento: "15/05/1990",
+    periodo: "Vespertino",
+    nomeMae: "Maria de Campos"
+  });
+  
   return (
     <View style={Estilo.fundo}>
       <View style={Estilo.ficha}>
@@ -14,23 +25,24 @@ export function Paciente() {
 
         <View style={Estilo.body}>
           <Text style={Estilo.label}>Nome Completo:</Text>
-          <TextInput style={Estilo.input} placeholder="Digite o nome" placeholderTextColor="#adadadff" />
+          <TextInput style={Estilo.input} value={paciente.nome} placeholder="Digite o nome" placeholderTextColor="#adadadff" />
 
           <Text style={Estilo.label}>Telefone:</Text>
-          <TextInput style={Estilo.input} placeholder="(xx) xxxxx-xxxx" keyboardType="phone-pad" placeholderTextColor="#adadadff" />
+          <TextInput style={Estilo.input} value={paciente.telefone} placeholder="(xx) xxxxx-xxxx" keyboardType="phone-pad" placeholderTextColor="#adadadff" />
 
           <Text style={Estilo.label}>Email:</Text>
-          <TextInput style={Estilo.input} placeholder="exemplo@email.com" keyboardType="email-address" placeholderTextColor="#adadadff" />
+          <TextInput style={Estilo.input} value={paciente.email} placeholder="exemplo@email.com" keyboardType="email-address" placeholderTextColor="#adadadff" />
 
           <Text style={Estilo.label}>Data de nascimento:</Text>
-          <TextInput style={Estilo.input} placeholder="dd/mm/aaaa" placeholderTextColor="#adadadff" />
+          <TextInput style={Estilo.input} value={paciente.dataNascimento} placeholder="dd/mm/aaaa" placeholderTextColor="#adadadff" />
 
           <Text style={Estilo.label}>Período:</Text>
-          <TextInput style={Estilo.input} placeholder="Ex: Matutino" placeholderTextColor="#adadadff" />
+          <TextInput style={Estilo.input} value={paciente.periodo} placeholder="Ex: Matutino" placeholderTextColor="#adadadff" />
 
           <Text style={Estilo.label}>Nome da Mãe:</Text>
           <TextInput 
             style={[Estilo.input, { marginBottom: 25 }]} 
+            value={paciente.nomeMae}
             placeholder="Digite o nome da mãe" 
             placeholderTextColor="#adadadff" 
           />
