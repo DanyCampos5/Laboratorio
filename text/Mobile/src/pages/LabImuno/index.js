@@ -70,7 +70,6 @@ export function TipagemSanguinea() {
   const [antiD, setAntiD] = useState("");
   const [teste, setTeste] = useState("");
 
-  // Filtro de pesquisa
   const resultadosFiltrados = MOCK_TIPAGEM_SANGUINEA.filter((item) =>
     item.name.toLowerCase().includes(pesquisa.toLowerCase())
   );
@@ -78,7 +77,7 @@ export function TipagemSanguinea() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        {/* Campo de pesquisa */}
+        
         <View style={styles.searchContainer}>
           <MaterialIcons name="search" size={22} color="#888" style={styles.searchIcon} />
           <TextInput
@@ -89,7 +88,6 @@ export function TipagemSanguinea() {
           />
         </View>
 
-        {/* Formulário */}
         <Text style={styles.title}>Tipagem Sanguínea</Text>
 
         <View style={styles.row}>
@@ -182,7 +180,6 @@ export function TipagemSanguinea() {
         </TouchableOpacity>
       </View>
 
-      {/* LISTAGEM DE REGISTROS */}
       <View style={styles.listContainer}>
         <Text style={styles.listTitle}>Registros de Tipagem</Text>
 
