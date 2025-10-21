@@ -6,6 +6,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './src/pages/home';
 import Exames from './src/pages/exames';
 import Paciente from './src/pages/cadastroPaciente';
+import { TipagemSanguinea } from './src/pages/LabImuno';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -16,6 +18,7 @@ export default function App() {
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Exames" component={Exames} />
         <Tab.Screen name="Paciente" component={Paciente} />
+        <Tab.Screen name="TipagemSanguinea" component={TipagemSanguinea} />
       </Tab.Navigator>
     </NavigationContainer>
   );
