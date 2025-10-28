@@ -15,7 +15,7 @@ export default function CadastroUsuario() {
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.container}>
-         
+
           <View style={styles.header}>
             <TouchableOpacity style={styles.backBtn}>
               <MaterialIcons name="arrow-back" size={24} color="#1976D2" />
@@ -23,7 +23,7 @@ export default function CadastroUsuario() {
             </TouchableOpacity>
           </View>
 
-        
+
           <View style={styles.center}>
             <Image
               source={{ uri: "https://github.com/amanuhatake.png" }}
@@ -31,12 +31,12 @@ export default function CadastroUsuario() {
             />
           </View>
 
-         
+
           <View style={styles.card}>
-            
+
             <Text style={styles.sectionTitle}>Dados pessoais</Text>
 
-            
+
             <View style={styles.inputRow}>
               <MaterialIcons name="person-outline" size={22} color="#1976D2" style={styles.icon} />
               <TextInput
@@ -47,7 +47,7 @@ export default function CadastroUsuario() {
               />
             </View>
 
-            
+
             <View style={styles.inputRow}>
               <MaterialIcons name="phone" size={22} color="#1976D2" style={styles.icon} />
               <TextInput
@@ -59,10 +59,10 @@ export default function CadastroUsuario() {
               />
             </View>
 
-           
+
             <Text style={styles.sectionTitle}>Acesso</Text>
 
-           
+
             <View style={styles.inputRow}>
               <MaterialIcons name="email" size={22} color="#1976D2" style={styles.icon} />
               <TextInput
@@ -75,7 +75,7 @@ export default function CadastroUsuario() {
               />
             </View>
 
-           
+
             <View style={styles.inputRow}>
               <MaterialIcons name="lock-outline" size={22} color="#A0A0A0" style={styles.icon} />
               <TextInput
@@ -90,7 +90,7 @@ export default function CadastroUsuario() {
               </TouchableOpacity>
             </View>
 
-            
+
             <View style={styles.inputRow}>
               <MaterialIcons name="lock-outline" size={22} color="#A0A0A0" style={styles.icon} />
               <TextInput
@@ -106,7 +106,7 @@ export default function CadastroUsuario() {
             </View>
           </View>
 
-      
+
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Cadastrar</Text>
           </TouchableOpacity>
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    maxWidth: 420, 
+    maxWidth: 420,
     backgroundColor: "#fff",
     borderRadius: 16,
     borderWidth: 1,
@@ -206,9 +206,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
-  },
-});import React, { useState } from "react";
+    fontWeight: "600",
+  },
+}); import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Dimensions } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -225,7 +225,7 @@ export default function CadastroUsuario() {
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.container}>
-         
+
           <View style={styles.header}>
             <TouchableOpacity style={styles.backBtn}>
               <MaterialIcons name="arrow-back" size={24} color="#1976D2" />
@@ -233,7 +233,7 @@ export default function CadastroUsuario() {
             </TouchableOpacity>
           </View>
 
-        
+
           <View style={styles.center}>
             <Image
               source={{ uri: "https://github.com/amanuhatake.png" }}
@@ -241,12 +241,12 @@ export default function CadastroUsuario() {
             />
           </View>
 
-         
+
           <View style={styles.card}>
-            
+
             <Text style={styles.sectionTitle}>Dados pessoais</Text>
 
-            
+
             <View style={styles.inputRow}>
               <MaterialIcons name="person-outline" size={22} color="#1976D2" style={styles.icon} />
               <TextInput
@@ -257,7 +257,7 @@ export default function CadastroUsuario() {
               />
             </View>
 
-            
+
             <View style={styles.inputRow}>
               <MaterialIcons name="phone" size={22} color="#1976D2" style={styles.icon} />
               <TextInput
@@ -269,10 +269,10 @@ export default function CadastroUsuario() {
               />
             </View>
 
-           
+
             <Text style={styles.sectionTitle}>Acesso</Text>
 
-           
+
             <View style={styles.inputRow}>
               <MaterialIcons name="email" size={22} color="#1976D2" style={styles.icon} />
               <TextInput
@@ -285,7 +285,7 @@ export default function CadastroUsuario() {
               />
             </View>
 
-           
+
             <View style={styles.inputRow}>
               <MaterialIcons name="lock-outline" size={22} color="#A0A0A0" style={styles.icon} />
               <TextInput
@@ -300,7 +300,7 @@ export default function CadastroUsuario() {
               </TouchableOpacity>
             </View>
 
-            
+
             <View style={styles.inputRow}>
               <MaterialIcons name="lock-outline" size={22} color="#A0A0A0" style={styles.icon} />
               <TextInput
@@ -316,7 +316,7 @@ export default function CadastroUsuario() {
             </View>
           </View>
 
-      
+
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Cadastrar</Text>
           </TouchableOpacity>
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    maxWidth: 420, 
+    maxWidth: 420,
     backgroundColor: "#fff",
     borderRadius: 16,
     borderWidth: 1,
@@ -416,6 +416,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
-  },
+    fontWeight: "600",
+  },
 });
