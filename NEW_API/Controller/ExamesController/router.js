@@ -27,31 +27,16 @@ router.get("/getPessoas", async (req, res) => {
 //rota para inserir um exame
 router.post("/insertexame", async (req, res) => {
     try {
-        const { dataExame, laboratorio, tipoExame, idPaciente } = req.body;
+        const { dataEntrada, dataExame, resultado, laboratorio, exame, idPaciente, idLabImun } = req.body;
 
         // Verificar se todos os campos necessários estão presentes
-        if (!dataExame) {
+        const camposObrigatorios = ['dataEntrada', 'dataExame', 'resultado', 'laboratorio', 'exame', 'idPaciente'];
+        const camposFaltando = camposObrigatorios.find(campo => !req.body[campo]);
+
+        if (camposFaltando) {
             return res.status(400).json({
                 error: true,
-                message: "O campo dataExame é obrigatório"
-            });
-        }
-        if (!laboratorio) {
-            return res.status(400).json({
-                error: true,
-                message: "O campo laboratorio é obrigatório"
-            });
-        }
-        if (!tipoExame) {
-            return res.status(400).json({
-                error: true,
-                message: "O campo tipoExame é obrigatório"
-            });
-        }
-        if (!idPaciente) {
-            return res.status(400).json({
-                error: true,
-                message: "O campo idPaciente é obrigatório"
+                message: `O campo ${camposFaltando} é obrigatório`
             });
         }
 
@@ -66,15 +51,15 @@ router.post("/insertexame", async (req, res) => {
                 idLabImun
             )
             VALUES (
-                CURRENT_DATE(),
-                ?,
-                'Aguardando',
                 ?,
                 ?,
                 ?,
-                NULL
+                ?,
+                ?,
+                ?,
+                ?
             )`,
-            [dataExame, laboratorio, tipoExame, idPaciente]
+            [dataEntrada, dataExame, resultado, laboratorio, exame, idPaciente, idLabImun]
         );
 
         res.status(201).json({
@@ -82,22 +67,72 @@ router.post("/insertexame", async (req, res) => {
             message: "Exame inserido com sucesso",
             insertId: result.insertId
         });
-            
+
     } catch (error) {
         console.error("Erro ao inserir exame:", error);
         res.status(500).json({
             error: true,
             message: "Erro ao inserir exame",
-            details: error.message
         });
     }
 })
 
 //rota para mostar pessoa por nome ou cpf
-router.get
+router.get("/getpessoa", async (req, res) => {
+    try {
+        const { nome } = req.query;
+        let query = 'SELECT * FROM pessoa';
+        let params = [];
+
+        // Se um nome foi fornecido, adiciona a condição WHERE
+        if (nome) {
+            query += ' WHERE nome LIKE ?';
+            params.push(`%${nome}%`); // usando % para busca parcial do nome
+        }
+
+        const [rows] = await pool.execute(query, params);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: nome ? `Nenhuma pessoa encontrada com o nome '${nome}'` : "Nenhuma pessoa cadastrada"
+            });
+        }
+
+        res.status(200).json({
+            error: false,
+            total: rows.length,
+            pessoas: rows
+        });
+    } catch (error) {
+        console.error("Erro na busca:", error);
+        res.status(500).json({ error: true, message: "Erro ao buscar pessoas" });
+    }
+})
 
 // rota para update nos exames
-router.put
+router.put("/editarExame/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { dataExame, resultado } = req.body;
+
+        const [result] = await pool.execute(
+            'UPDATE ExamesSolicitados SET dataExame = ?, resultado = ? WHERE idExamesSolicitados = ?',
+            [dataExame, resultado, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: true, message: "Exame não encontrado" });
+        }
+
+        console.log(result);
+        res.status(200).json({ error: false, message: "Exame atualizado com sucesso!" });
+
+    } catch (error) {
+        console.error("Erro ao remover > ", error);
+        res.status(400).json({error: true, message: "Erro ao update"})
+    }
+})
 
 // rota para deletar exames
 router.delete
