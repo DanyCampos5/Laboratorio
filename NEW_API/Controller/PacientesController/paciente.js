@@ -1,20 +1,19 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require('../db/mysqlConnect');
+const router = express.Router();
+const pool = require('../../db');
 
 const app = express();
 
-// Middlewares basicos
 app.use(cors());
-app.use(express.json()); 
+app.use(express.json());
 
-
-app.get("/", async (req, res) => {
+router.get("/", async (req, res) => {
     res.json({ status: "Ok" });
 });
 
 // GET em pacientes
-app.get("/getpacientes", async (req, res) => {
+router.get("/getpacientes", async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM paciente;');
 
@@ -30,7 +29,7 @@ app.get("/getpacientes", async (req, res) => {
 });
 
 // Buscar paciente específico
-app.get("/getpaciente/:id", async (req, res) => {
+router.get("/getpaciente/:id", async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -51,7 +50,7 @@ app.get("/getpaciente/:id", async (req, res) => {
 });
 
 // Inserindo um novo paciente
-app.post("/insertpaciente", async (req, res) => {
+router.post("/insertpaciente", async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
 
@@ -77,7 +76,7 @@ app.post("/insertpaciente", async (req, res) => {
 });
 
 // Atualizando paciente
-app.put("/updatepaciente/:id", async (req, res) => {
+router.put("/updatepaciente/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
@@ -110,7 +109,7 @@ app.put("/updatepaciente/:id", async (req, res) => {
 });
 
 // Removendo paciente
-app.delete("/deletepaciente/:id", async (req, res) => {
+router.delete("/deletepaciente/:id", async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -132,3 +131,5 @@ app.delete("/deletepaciente/:id", async (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+
+module.exports = router;

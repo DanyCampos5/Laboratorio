@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const examesRoutes = require("./Controller/ExamesController/router");
+const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
 const pessoasRoutes = require("./Controller/PessoasController/pessoa");
 

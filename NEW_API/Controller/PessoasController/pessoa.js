@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require('../db/mysqlConnect');
+const router = express.Router();
+const pool = require('../../db');
 
 const app = express();
 
-// Middlewares basicos
 app.use(cors());
 app.use(express.json());
 
@@ -13,13 +13,12 @@ function testaToken(token) {
     return token === "eGv&>V£s}zV_q]#TSx[B520WGP|!~VOpe@~867E";
 }
 
-
-app.get("/", async (req, res) => {
+router.get("/", async (req, res) => {
     res.json({ status: "Ok" });
 });
 
 // GET en pessoas
-app.get("/getpessoas", async (req, res) => {
+router.get("/getpessoas", async (req, res) => {
     try {
         const auth = req.headers.authorization;
         const token = auth ? auth.split(" ")[1] : null;
@@ -38,7 +37,7 @@ app.get("/getpessoas", async (req, res) => {
 });
 
 // GET em pessoa específica
-app.get("/getpessoa/:id", async (req, res) => {
+router.get("/getpessoa/:id", async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -59,7 +58,7 @@ app.get("/getpessoa/:id", async (req, res) => {
 });
 
 // Inseririndo nova pessoa
-app.post("/insertpessoa", async (req, res) => {
+router.post("/insertpessoa", async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo } = req.body;
 
@@ -83,7 +82,7 @@ app.post("/insertpessoa", async (req, res) => {
 });
 
 // Atualizando pessoa
-app.put("/updatepessoa/:id", async (req, res) => {
+router.put("/updatepessoa/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, dataNascimento, telefone, email, sexo } = req.body;
@@ -113,7 +112,7 @@ app.put("/updatepessoa/:id", async (req, res) => {
 });
 
 // Removendo pessoa (D)
-app.delete("/deletepessoa/:id", async (req, res) => {
+router.delete("/deletepessoa/:id", async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -133,5 +132,4 @@ app.delete("/deletepessoa/:id", async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+module.exports = router;

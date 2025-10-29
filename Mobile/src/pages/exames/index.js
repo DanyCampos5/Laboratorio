@@ -1,23 +1,30 @@
 import { StyleSheet, View, TextInput, TouchableOpacity, Button } from "react-native";
 import { FlatList, Text, StatusBar } from 'react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 export default function Exames() {
 
-    const MOCK_DATA = [
-        { id: '1', name: 'Ana Silva', exams: ['Hemograma', 'Glicemia'], date: '2025-09-10' },
-        { id: '2', name: 'Bruno Costa', exams: ['Perfil Lipídico'], date: '2025-09-12' },
-        { id: '3', name: 'Carla Dias', exams: ['TSH', 'T4 Livre', 'Hemograma'], date: '2025-08-30' },
-        { id: '4', name: 'Daniel Alves', exams: ['Ureia/Creatinina'], date: '2025-09-01' },
-    ];
+    const [pessoas, setpessoas] = useState([]);
+    const [atualizando, setatulizando] = useState(true);
 
-    const [query, setQuery] = useState('');
+    useEffect(()=>{
+        getCars();
+    })
 
-    const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return MOCK_DATA;
-        return MOCK_DATA.filter(item => item.name.toLowerCase().includes(q));
-    }, [query]);
+    const getCars = async () => {
+    try {
+      setAtualizando(true);
+      console.log("Iniciando a conexão com a API...");
+      const response = await fetch("http://localhost:3000/exames/getpessoas");
+      console.log("Conteudo de response: ", response);
+      const json = await response.json();
+      console.log("Conteudo: ", json);
+      setCars(json);
+      setAtualizando(false);
+    } catch (error) {
+      console.error("Erro ao requisitar a API  ", error);
+    }
+  }
 
     return (
         <View style={Estilo.container}>
@@ -39,23 +46,9 @@ export default function Exames() {
                 </View>
 
                 <FlatList
-                    data={filtered}
-                    renderItem={({ item }) => {
-                        const examsText = item.exams ? item.exams.join(', ') : '';
-                        const date = item.date ? new Date(item.date) : null;
-                        const dateText = date ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}` : '';
-                        return (
-                            <View style={Estilo.listItem}>
-                                <Text style={[Estilo.listItemText, Estilo.nameText]}>{item.name}</Text>
-                                <Text style={Estilo.examsText}>{examsText}</Text>
-                                <Text style={Estilo.dateText}>{dateText}</Text>
-                                <Button 
-                                title="Editar Exames"
-                                />
-                            </View>
-                        )
-                    }}
-                    keyExtractor={item => item.id}
+                    data={pessoas}
+                    renderItem={(item)=> <Text> {item.nome} </Text>}
+                    keyExtractor={item => item.idPessoa}
                 />
             </View>
         </View>
