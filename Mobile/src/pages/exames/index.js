@@ -70,12 +70,20 @@ export default function Exames() {
                                 </Text>
                                 <Text style={Estilo.infoText}>Tel: {item.telefone}</Text>
                                 <Text style={Estilo.infoText}>{item.email}</Text>
-                                <TouchableOpacity 
-                                    style={Estilo.editButton}
-                                    onPress={() => navigation.navigate('EditarExames', { pessoaId: item.idPessoa })}
-                                >
-                                    <Text style={Estilo.editButtonText}>Editar Exames</Text>
-                                </TouchableOpacity>
+                                <View style={Estilo.buttonContainer}>
+                                    <TouchableOpacity 
+                                        style={Estilo.editButton}
+                                        onPress={() => navigation.navigate('EditarExames', { pessoaId: item.idPessoa })}
+                                    >
+                                        <Text style={Estilo.editButtonText}>Editar Exames</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        style={Estilo.addButton}
+                                        onPress={() => navigation.navigate('AdicionarExames', { pessoaId: item.idPessoa })}
+                                    >
+                                        <Text style={Estilo.addButtonText}>Adicionar Exame</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         )}
                         keyExtractor={item => item.idPessoa?.toString()}
@@ -94,6 +102,37 @@ export default function Exames() {
 }
 
 const Estilo = StyleSheet.create({
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 8,
+    },
+    editButton: {
+        backgroundColor: '#007BFF',
+        padding: 8,
+        borderRadius: 4,
+        flex: 1,
+        marginRight: 8,
+    },
+    editButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        textAlign: 'center',
+        fontWeight: '500',
+    },
+    addButton: {
+        backgroundColor: '#28a745',
+        padding: 8,
+        borderRadius: 4,
+        flex: 1,
+        marginLeft: 8,
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        textAlign: 'center',
+        fontWeight: '500',
+    },
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',

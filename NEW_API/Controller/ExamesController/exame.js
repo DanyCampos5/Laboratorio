@@ -106,6 +106,36 @@ router.get("/getpessoa", async (req, res) => {
 })
 
 // rota para update nos exames
+// Rota para buscar exames de um paciente específico
+router.get("/getExames/:idPaciente", async (req, res) => {
+    try {
+        const { idPaciente } = req.params;
+        
+        const [rows] = await pool.execute(
+            `SELECT * FROM ExamesSolicitados 
+             WHERE idPaciente = ?
+             ORDER BY dataExame DESC`,
+            [idPaciente]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: "Nenhum exame encontrado para este paciente"
+            });
+        }
+
+        res.status(200).json(rows);
+
+    } catch (error) {
+        console.error("Erro ao buscar exames:", error);
+        res.status(500).json({
+            error: true,
+            message: "Erro ao buscar exames do paciente"
+        });
+    }
+});
+
 router.put("/editarExame/:id", async (req, res) => {
     try {
         const { id } = req.params;
