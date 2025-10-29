@@ -1,30 +1,41 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, Button } from "react-native";
-import { FlatList, Text, StatusBar } from 'react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import { 
+    StyleSheet, 
+    View, 
+    TextInput, 
+    TouchableOpacity, 
+    ActivityIndicator,
+    FlatList, 
+    Text, 
+    StatusBar 
+} from "react-native";
+import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Exames() {
+    const navigation = useNavigation();
 
-    const [pessoas, setpessoas] = useState([]);
-    const [atualizando, setatulizando] = useState(true);
+    const [pessoas, setPessoas] = useState([]);
+    const [atualizando, setAtualizando] = useState(true);
+    const [nome, setNome] = useState('');
 
-    useEffect(()=>{
-        getCars();
-    })
+    useEffect(() => {
+        getPessoas();
+    }, []) // array vazio para executar apenas uma vez
 
-    const getCars = async () => {
-    try {
-      setAtualizando(true);
-      console.log("Iniciando a conexão com a API...");
-      const response = await fetch("http://localhost:3000/exames/getpessoas");
-      console.log("Conteudo de response: ", response);
-      const json = await response.json();
-      console.log("Conteudo: ", json);
-      setCars(json);
-      setAtualizando(false);
-    } catch (error) {
-      console.error("Erro ao requisitar a API  ", error);
+    const getPessoas = async () => {
+        try {
+            setAtualizando(true);
+            console.log("Iniciando a conexão com a API...");
+            const response = await fetch("http://localhost:3000/exames/getPessoas");
+            console.log("Conteudo de response: ", response);
+            const json = await response.json();
+            console.log("Conteudo: ", json);
+            setPessoas(json);
+            setAtualizando(false);
+        } catch (error) {
+            console.error("Erro ao requisitar a API  ", error);
+        }
     }
-  }
 
     return (
         <View style={Estilo.container}>
@@ -34,22 +45,49 @@ export default function Exames() {
                     <TextInput
                         placeholder="Pesquisar paciente..."
                         style={Estilo.search}
-                        value={query}
-                        onChangeText={setQuery}
+                        value={nome}
+                        onChangeText={setNome}
                         placeholderTextColor="#999"
                     />
-                    {query.length > 0 && (
-                        <TouchableOpacity onPress={() => setQuery('')} style={Estilo.clearButton}>
-                            <Text style={Estilo.clearButtonText}>×</Text>
-                        </TouchableOpacity>
-                    )}
+                    <TouchableOpacity onPress={() => setNome('')} style={Estilo.clearButton}>
+                        <Text style={Estilo.clearButtonText}>×</Text>
+                    </TouchableOpacity>
+
                 </View>
 
-                <FlatList
-                    data={pessoas}
-                    renderItem={(item)=> <Text> {item.nome} </Text>}
-                    keyExtractor={item => item.idPessoa}
-                />
+                {atualizando ? (
+                    <ActivityIndicator size="large" color="#007BFF" style={Estilo.loader} />
+                ) : (
+                    <FlatList
+                        data={pessoas.filter(pessoa => 
+                            pessoa.nome?.toLowerCase().includes(nome.toLowerCase())
+                        )}
+                        renderItem={({ item }) => (
+                            <View style={Estilo.listItem}>
+                                <Text style={Estilo.nameText}>{item.nome}</Text>
+                                <Text style={Estilo.infoText}>
+                                    Nascimento: {new Date(item.dataNascimento).toLocaleDateString()}
+                                </Text>
+                                <Text style={Estilo.infoText}>Tel: {item.telefone}</Text>
+                                <Text style={Estilo.infoText}>{item.email}</Text>
+                                <TouchableOpacity 
+                                    style={Estilo.editButton}
+                                    onPress={() => navigation.navigate('EditarExames', { pessoaId: item.idPessoa })}
+                                >
+                                    <Text style={Estilo.editButtonText}>Editar Exames</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        keyExtractor={item => item.idPessoa?.toString()}
+                        contentContainerStyle={Estilo.listContainer}
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={() => (
+                            <Text style={Estilo.emptyText}>
+                                {nome ? "Nenhuma pessoa encontrada" : "Nenhuma pessoa cadastrada"}
+                            </Text>
+                        )}
+                    />
+                )}
             </View>
         </View>
     )
@@ -58,36 +96,12 @@ export default function Exames() {
 const Estilo = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: '#f5f5f5',
         paddingTop: StatusBar.currentHeight || 0,
-        paddingHorizontal: 20,
     },
     header: {
-        marginBottom: 6
-    },
-    listItem: {
-        backgroundColor: '#f0f0f0',
-        padding: 15,
-        marginVertical: 5,
-        borderRadius: 8,
-    },
-    listItemText: {
-        fontSize: 16
-    },
-    nameText: {
-        fontWeight: '600',
-        fontSize: 16,
-        marginBottom: 4
-    },
-    examsText: {
-        color: '#444',
-        marginBottom: 6
-    },
-    dateText: {
-        color: '#666',
-        fontSize: 12
+        width: '100%',
+        padding: 16,
     },
     searchContainer: {
         flexDirection: 'row',
@@ -96,8 +110,54 @@ const Estilo = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#007BFF',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginBottom: 16,
+        elevation: 2,
+    },
+    search: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+    clearButton: {
+        padding: 4,
+    },
+    clearButtonText: {
+        fontSize: 20,
+        color: '#999',
+    },
+    listContainer: {
+        padding: 16,
+    },
+    listItem: {
+        backgroundColor: '#ffffff',
+        padding: 16,
+        marginBottom: 12,
+        borderRadius: 12,
+        elevation: 3,
+        borderLeftWidth: 4,
+        borderLeftColor: '#007BFF',
+    },
+    nameText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 8,
+    },
+    infoText: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
+    },
+    emptyText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#666',
+        marginTop: 24,
+    },
+    loader: {
+        marginTop: 24,
         marginBottom: 10,
         width: '100%'
     },
@@ -116,7 +176,19 @@ const Estilo = StyleSheet.create({
     clearButtonText: {
         fontSize: 18,
         color: '#666'
+    },
+    editButton: {
+        backgroundColor: '#007BFF',
+        padding: 8,
+        borderRadius: 6,
+        marginTop: 8,
+        alignSelf: 'flex-start',
+    },
+    editButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '500',
     }
-})
+});
 
 

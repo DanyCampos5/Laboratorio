@@ -15,4 +15,4 @@ app.use('/pacientes', pacientesRoutes);
 app.use('/pessoas', pessoasRoutes);
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor ouvindo a porta: ${PORT}`));

@@ -1,18 +1,13 @@
 const express = require('express');
-const cors = require('cors');
 const router = express.Router();
-const app = express();
 const pool = require('../../db');
-
-app.use(cors());
-app.use(express.json());
 
 router.get("/", async (req, res) => {
     res.status(200).json({ status: "ok", message: "CONEXÃO BOAA" });
 })
 
 //rota para exibir todas as pessoas
-router.get("/getPessoas", async (req, res) => {
+router.get("/getpessoas", async (req, res) => {
     try {
         const [rows] = await pool.execute(
             'SELECT * FROM pessoa'
@@ -133,10 +128,5 @@ router.put("/editarExame/:id", async (req, res) => {
         res.status(400).json({error: true, message: "Erro ao update"})
     }
 })
-
-// rota para deletar exames
-router.delete
-
-
 
 module.exports = router;
