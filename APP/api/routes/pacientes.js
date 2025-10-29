@@ -9,3 +9,5 @@ router.put("/:idPaciente", updatePaciente);
 router.delete("/:idPaciente", deletePaciente);
 
 export default router;
+
+
