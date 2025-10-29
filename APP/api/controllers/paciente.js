@@ -1,21 +1,4 @@
-import { db } from '../db.js';
 
-export const getPacientes = async (_, res) => {
-  const q = `
-    SELECT p.idPaciente, pe.nome, pe.dataNascimento, pe.telefone, pe.email, pe.sexo,
-           p.nomeMae, p.periodo, p.dataCadastro
-    FROM paciente p
-    INNER JOIN pessoa pe ON pe.idPessoa = p.idPessoa
-  `;
-
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.status(200).json(data);
-  });
-};
-
-export const addPaciente = async (req, res) => {
-  const {
     nome,
     dataNascimento,
     telefone,
@@ -23,82 +6,131 @@ export const addPaciente = async (req, res) => {
     sexo,
     nomeMae,
     periodo
-  } = req.body;
+  
 
-  const insertPessoa = `
-    INSERT INTO pessoa (nome, dataNascimento, telefone, email, sexo)
-    VALUES (?, ?, ?, ?, ?)
-  `;
+  
+const express = require('express');
+const cors = require('cors');
+const pool = require('../db/mysqlConnect');
 
-  db.query(insertPessoa, [nome, dataNascimento, telefone, email, sexo], (err, result) => {
-    if (err) return res.status(500).json(err);
+const app = express();
 
-    const idPessoa = result.insertId;
+//Midlewares básicos
+app.use(cors());
+app.use(express.json()); //Permitir que recebamos JSON nas requisições
 
-    const insertPaciente = `
-      INSERT INTO paciente (idPessoa, nomeMae, periodo, dataCadastro)
-      VALUES (?, ?, ?, CURDATE())
-    `;
+app.get("/", async (req, res) => {
+    res.json({status: "Ok"});
+});
 
-    db.query(insertPaciente, [idPessoa, nomeMae, periodo], (err2) => {
-      if (err2) return res.status(500).json(err2);
-      return res.status(200).json("Paciente adicionado com sucesso.");
-    });
-  });
-};
+//GET em pessoas (R)
+app.get("/getpessoas", async (req, res) => {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT * FROM pessoa;'
+        );
 
-export const updatePaciente = async (req, res) => {
-  const { idPaciente } = req.params;
-  const {
-    nome,
-    dataNascimento,
-    telefone,
-    email,
-    sexo,
-    nomeMae,
-    periodo
-  } = req.body;
+        setTimeout(()=>{
+            console.log("Simulando um delay de API");
+            res.status(202).json(rows);
+        }, 5000);
+        
+    } catch (error){
+        console.error("Erro ao realizar consulta: ", error);
+    }
+});
 
-  const q1 = `
-    UPDATE pessoa
-    SET nome = ?, dataNascimento = ?, telefone = ?, email = ?, sexo = ?
-    WHERE idPessoa = (SELECT idPessoa FROM paciente WHERE idPaciente = ?)
-  `;
+//GET em um pessoa especifico (R)
+app.get("/getpessoas/:id", async (req, res) => {
+    try{
+        const {id} = req.params;
+        const [rows] = await pool.execute(
+            'SELECT * FROM pessoas WHERE id = ?',
+            [id]
+        );
+        console.log("Resultado da Query: ", rows);
+        if(rows.length === 0) return res.status(404).json({error: false, message: "Pessoa não encontrado!"});
+        res.status(200).json({error: false, car: rows[0]});
+    }catch(error){
 
-  db.query(q1, [nome, dataNascimento, telefone, email, sexo, idPaciente], (err) => {
-    if (err) return res.status(500).json(err);
+    }
+})
 
-    const q2 = `
-      UPDATE paciente
-      SET nomeMae = ?, periodo = ?
-      WHERE idPaciente = ?
-    `;
+//Inserindo um novo Pessoa (C)
+app.post("/insertcar", async (req, res) => {
+    try{
+        const { pmarca, pmodelo } = req.body;
+        
+        if(!pmarca || pmodelo == null){
+            return res.status(400).json({error: true, message: "Marca ou modelo não foi informado"});
+        }
 
-    db.query(q2, [nomeMae, periodo, idPaciente], (err2) => {
-      if (err2) return res.status(500).json(err2);
-      return res.status(200).json("Paciente atualizado com sucesso.");
-    });
-  });
-};
+        const [result] = await pool.execute(
+            'INSERT INTO pessoa(marca, modelo) VALUES(?, ?)',
+            [pmarca, pmodelo]
+        );
 
-export const deletePaciente = async (req, res) => {
-  const { idPaciente } = req.params;
+        console.log(result);
 
-  const getPessoa = "SELECT idPessoa FROM paciente WHERE idPaciente = ?";
+        if(result.affectedRows > 0){
+            res.status(201).json({error: false, message: "Pessoa inserido"});
+        }else{
+            res.status(400).json({error: true, message: "Pessoa não inserido"});
+        }
+    }catch(error){
+        console.error("Erro ao inserir: ", error);
+    }
+})
 
-  db.query(getPessoa, [idPaciente], (err, data) => {
-    if (err) return res.status(500).json(err);
-    if (data.length === 0) return res.status(404).json("Paciente não encontrado.");
+//Atualizando um pessoa (U)
+app.put("/updatecar/:id", async (req, res) => {
+    try{
+        const {id} = req.params;
+        const {pmarca, pmodelo} = req.body;
+    
+        if(!pmarca || !pmodelo || !id) return res.status(400).json({error: true, message: "Informe: id, marca e modelo!"});
+    
+        const [result] = await pool.execute(
+            'UPDATE pessoa SET marca = ?, modelo = ? WHERE id = ?',
+            [pmarca, pmodelo, id]
+        );
+    
+        console.log(result);
+    
+        if(result.affectedRows === 0) return res.status(400).json({error: true, message: "Não foi encontrado pessoa com esse ID"});
+    
+        const [rows] = await pool.execute(
+            'SELECT * FROM pessoa WHERE id = ?',
+            [id]
+        )
+    
+        res.status(202).json({error: false, message: "Pessoa atualizado com sucesso!", pessoa: rows[0]});
+    }catch(error){
+        console.error("Erro ao atualizar: ", error);
+        res.status(400).json({error: true, message: "Ocorreu um erro ao tentar atualizar o pessoa!"});
+    }
+})
 
-    const idPessoa = data[0].idPessoa;
+//Removendo um pessoa (D)
+app.delete("/deletecar/:id", async (req, res) => {
+    try{
+        const {id} = req.params;
 
-    db.query("DELETE FROM paciente WHERE idPaciente = ?", [idPaciente], (err2) => {
-      if (err2) return res.status(500).json(err2);
+        const [result] = await pool.execute(
+            'DELETE FROM pessoa WHERE id = ?',
+            [id]
+        );
 
-      db.query("DELETE FROM pessoa WHERE idPessoa = ?", [idPessoa], (err3) => {
-        if (err3) return res.status(500).json(err3);
-        return res.status(200).json("Paciente deletado com sucesso.");
-      });
-    });
-  });
-};
+        if(result.affectedRows === 0) return res.status(400).json({error: true, message: "Erro ao remover pessoa, pessoa com o ID não encontrado"});
+        res.status(200).json({error: false, message: "Pessoa removido com sucesso!"});
+    }catch(error){
+        console.error("Erro ao remover: ", error);
+        res.status(400).json({error: true, message: "Erro ao remover pessoa!"});
+    }
+
+
+})
+
+
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
