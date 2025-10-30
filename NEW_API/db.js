@@ -4,7 +4,7 @@ const pool = mysql.createPool({ // cria um pool de conexões reutilizável
     host: "localhost",
     port: "3306",
     user: "root",
-    password: "",
+    password: "root",
     database: "crud",
     waitForConnections: true,
     connectionLimit: 10,
