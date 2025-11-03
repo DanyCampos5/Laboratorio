@@ -159,4 +159,21 @@ router.put("/editarExame/:id", async (req, res) => {
     }
 })
 
+router.delete("/deletarexame/:id", async (req, res) => {
+    try {
+        const  { id } = req.params;
+        const [result] = await pool.execute(
+            'DELETE FROM ExamesSolicitados WHERE idExamesSolicitados = ?',
+            [id]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: true, message: "Exame não encontrado" });
+        }
+        res.status(200).json({ error: false, message: "Exame deletado com sucesso!"});
+    } catch (error) {
+        console.error("Erro ao deletar: ", error);
+        res.status(500).json({error: true, message: "Erro ao deletar!"});
+    }
+})
+
 module.exports = router;
