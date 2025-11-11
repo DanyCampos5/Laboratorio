@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const examesRoutes = require("./Controller/ExamesController/router");
+const usuarioRoutes = require("./Controller/UsuarioController/usuario");
 const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
 const pessoasRoutes = require("./Controller/PessoasController/pessoa");
@@ -11,8 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/exames', examesRoutes);
-app.use('/pacientes', pacientesRoutes);
-app.use('/pessoas', pessoasRoutes);
+app.use('/usuarios', usuarioRoutes);
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Servidor ouvindo a porta: ${PORT}`));
+app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+
+
