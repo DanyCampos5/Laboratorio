@@ -59,6 +59,12 @@ router.post("/insertpaciente", async (req, res) => {
         }
 
         const [result] = await pool.execute(
+            ÍNSERT INTO pessoa (nome, dataNascimento, telefone, email, sexo)
+            VALUES'(?, ?, ?, ?, ? )',
+            [nome, dataNascimento, telefone, email, sexo]
+        );
+
+        const [result] = await pool.execute(
             `INSERT INTO paciente (nome, dataNascimento, telefone, email, sexo, nomeMae, periodo)
              VALUES(?, ?, ?, ?, ?, ?, ?)`,
             [nome, dataNascimento, telefone, email, sexo, nomeMae, periodo]
