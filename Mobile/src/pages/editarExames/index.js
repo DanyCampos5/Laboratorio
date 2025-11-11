@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function EditarExames({ route }) {
-    const { pessoaId } = route.params;
+    const { pacienteId } = route.params; // Corrigido para corresponder ao que é enviado pela tela anterior
     const navigation = useNavigation();
     
     const [exames, setExames] = useState([]);
@@ -28,9 +28,14 @@ export default function EditarExames({ route }) {
 
     const fetchExames = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/exames/getExames/${pessoaId}`);
+            const response = await fetch(`http://localhost:3000/exames/getExames/${pacienteId}`);
             const data = await response.json();
-            setExames(data);
+            // Garante que 'exames' seja sempre um array para evitar o erro .map()
+            if (response.ok && Array.isArray(data)) {
+                setExames(data);
+            } else {
+                setExames([]); // Define como array vazio em caso de erro ou se nenhum exame for encontrado
+            }
             setLoading(false);
         } catch (error) {
             console.error('Erro ao buscar exames:', error);
