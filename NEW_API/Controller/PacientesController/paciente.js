@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
     res.json({ status: "Ok" });
 });
 
-// GET em pacientes
+// GET todos pacientes
 router.get("/getpacientes", async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM paciente;');
@@ -20,7 +20,7 @@ router.get("/getpacientes", async (req, res) => {
         setTimeout(() => {
             console.log("Simulando um delay de API");
             res.status(202).json(rows);
-        }, 5000);
+        }, 500);
 
     } catch (error) {
         console.error("Erro ao realizar consulta: ", error);
@@ -28,7 +28,7 @@ router.get("/getpacientes", async (req, res) => {
     }
 });
 
-// Buscar paciente específico
+// GET paciente específico
 router.get("/getpaciente/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -49,7 +49,7 @@ router.get("/getpaciente/:id", async (req, res) => {
     }
 });
 
-// Inserindo um novo paciente
+// POST inserir paciente
 router.post("/insertpaciente", async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
@@ -59,21 +59,15 @@ router.post("/insertpaciente", async (req, res) => {
         }
 
         const [result] = await pool.execute(
-            ÍNSERT INTO pessoa (nome, dataNascimento, telefone, email, sexo)
-            VALUES'(?, ?, ?, ?, ? )',
-            [nome, dataNascimento, telefone, email, sexo]
-        );
-
-        const [result] = await pool.execute(
             `INSERT INTO paciente (nome, dataNascimento, telefone, email, sexo, nomeMae, periodo)
-             VALUES(?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [nome, dataNascimento, telefone, email, sexo, nomeMae, periodo]
         );
 
         if (result.affectedRows > 0)
-            res.status(201).json({ error: false, message: "Paciente inserido com sucesso" });
-        else
-            res.status(400).json({ error: true, message: "Erro ao inserir paciente" });
+            return res.status(201).json({ error: false, message: "Paciente inserido com sucesso" });
+
+        return res.status(400).json({ error: true, message: "Erro ao inserir paciente" });
 
     } catch (error) {
         console.error("Erro ao inserir paciente: ", error);
@@ -81,7 +75,7 @@ router.post("/insertpaciente", async (req, res) => {
     }
 });
 
-// Atualizando paciente
+// PUT atualizar paciente
 router.put("/updatepaciente/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -114,7 +108,7 @@ router.put("/updatepaciente/:id", async (req, res) => {
     }
 });
 
-// Removendo paciente
+// DELETE remover paciente
 router.delete("/deletepaciente/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -134,6 +128,5 @@ router.delete("/deletepaciente/:id", async (req, res) => {
         res.status(500).json({ error: true, message: "Erro interno ao remover paciente" });
     }
 });
-
 
 module.exports = router;

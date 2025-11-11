@@ -4,7 +4,7 @@ const examesRoutes = require("./Controller/ExamesController/router");
 const usuarioRoutes = require("./Controller/UsuarioController/usuario");
 const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
-const pessoasRoutes = require("./Controller/PessoasController/pessoa");
+
 
 const app = express();
 
@@ -14,6 +14,7 @@ app.use(express.json());
 
 app.use('/exames', examesRoutes);
 app.use('/usuarios', usuarioRoutes);
+app.use('/pacientes', pacientesRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
