@@ -16,11 +16,7 @@ router.get("/", async (req, res) => {
 router.get("/getpacientes", async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM paciente;');
-
-        setTimeout(() => {
-            console.log("Simulando um delay de API");
-            res.status(202).json(rows);
-        }, 500);
+        res.status(200).json(rows);
 
     } catch (error) {
         console.error("Erro ao realizar consulta: ", error);

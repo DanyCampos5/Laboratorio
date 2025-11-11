@@ -26,7 +26,7 @@ export default function Exames() {
         try {
             setAtualizando(true);
             console.log("Iniciando a conexão com a API...");
-            const response = await fetch("http://localhost:3000/exames/getPessoas");
+            const response = await fetch("http://localhost:3000/exames/getpacientes");
             console.log("Conteudo de response: ", response);
             const json = await response.json();
             console.log("Conteudo: ", json);
@@ -39,64 +39,63 @@ export default function Exames() {
 
     return (
         <View style={Estilo.container}>
-            <View style={Estilo.header}>
-                <View style={Estilo.searchContainer}>
-                    <Text style={{ display: 'none' }}>icon</Text>
-                    <TextInput
-                        placeholder="Pesquisar paciente..."
-                        style={Estilo.search}
-                        value={nome}
-                        onChangeText={setNome}
-                        placeholderTextColor="#999"
-                    />
-                    <TouchableOpacity onPress={() => setNome('')} style={Estilo.clearButton}>
-                        <Text style={Estilo.clearButtonText}>×</Text>
-                    </TouchableOpacity>
-
-                </View>
-
-                {atualizando ? (
-                    <ActivityIndicator size="large" color="#007BFF" style={Estilo.loader} />
-                ) : (
-                    <FlatList
-                        data={pessoas.filter(pessoa => 
-                            pessoa.nome?.toLowerCase().includes(nome.toLowerCase())
-                        )}
-                        renderItem={({ item }) => (
-                            <View style={Estilo.listItem}>
-                                <Text style={Estilo.nameText}>{item.nome}</Text>
-                                <Text style={Estilo.infoText}>
-                                    Nascimento: {new Date(item.dataNascimento).toLocaleDateString()}
-                                </Text>
-                                <Text style={Estilo.infoText}>Tel: {item.telefone}</Text>
-                                <Text style={Estilo.infoText}>{item.email}</Text>
-                                <View style={Estilo.buttonContainer}>
-                                    <TouchableOpacity 
-                                        style={Estilo.editButton}
-                                        onPress={() => navigation.navigate('EditarExames', { pessoaId: item.idPessoa })}
-                                    >
-                                        <Text style={Estilo.editButtonText}>Editar Exames</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity 
-                                        style={Estilo.addButton}
-                                        onPress={() => navigation.navigate('AdicionarExames', { pessoaId: item.idPessoa })}
-                                    >
-                                        <Text style={Estilo.addButtonText}>Adicionar Exame</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        )}
-                        keyExtractor={item => item.idPessoa?.toString()}
-                        contentContainerStyle={Estilo.listContainer}
-                        showsVerticalScrollIndicator={false}
-                        ListEmptyComponent={() => (
-                            <Text style={Estilo.emptyText}>
-                                {nome ? "Nenhuma pessoa encontrada" : "Nenhuma pessoa cadastrada"}
-                            </Text>
-                        )}
-                    />
-                )}
+            {/* A barra de pesquisa agora fica diretamente no container principal */}
+            <View style={Estilo.searchContainer}>
+                <Text style={{ display: 'none' }}>icon</Text>
+                <TextInput
+                    placeholder="Pesquisar paciente..."
+                    style={Estilo.search}
+                    value={nome}
+                    onChangeText={setNome}
+                    placeholderTextColor="#999"
+                />
+                <TouchableOpacity onPress={() => setNome('')} style={Estilo.clearButton}>
+                    <Text style={Estilo.clearButtonText}>×</Text>
+                </TouchableOpacity>
             </View>
+
+            {/* A FlatList agora também fica diretamente no container principal */}
+            {atualizando ? (
+                <ActivityIndicator size="large" color="#007BFF" style={Estilo.loader} />
+            ) : (
+                <FlatList
+                    data={pessoas.filter(pessoa =>
+                        pessoa.nome?.toLowerCase().includes(nome.toLowerCase())
+                    )}
+                    renderItem={({ item }) => (
+                        <View style={Estilo.listItem}>
+                            <Text style={Estilo.nameText}>{item.nome}</Text>
+                            <Text style={Estilo.infoText}>
+                                Nascimento: {new Date(item.dataNascimento).toLocaleDateString()}
+                            </Text>
+                            <Text style={Estilo.infoText}>Tel: {item.telefone}</Text>
+                            <Text style={Estilo.infoText}>{item.email}</Text>
+                            <View style={Estilo.buttonContainer}>
+                                <TouchableOpacity
+                                    style={Estilo.editButton}
+                                    onPress={() => navigation.navigate('EditarExames', { pacienteId: item.idPaciente })}
+                                >
+                                    <Text style={Estilo.editButtonText}>Editar Exames</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={Estilo.addButton}
+                                    onPress={() => navigation.navigate('AdicionarExames', { pacienteId: item.idPaciente })}
+                                >
+                                    <Text style={Estilo.addButtonText}>Adicionar Exame</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                    keyExtractor={item => item.idPaciente?.toString()}
+                    contentContainerStyle={Estilo.listContainer}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={() => (
+                        <Text style={Estilo.emptyText}>
+                            {nome ? "Nenhuma pessoa encontrada" : "Nenhuma pessoa cadastrada"}
+                        </Text>
+                    )}
+                />
+            )}
         </View>
     )
 }
@@ -138,10 +137,6 @@ const Estilo = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         paddingTop: StatusBar.currentHeight || 0,
     },
-    header: {
-        width: '100%',
-        padding: 16,
-    },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -150,9 +145,10 @@ const Estilo = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#007BFF',
         paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginBottom: 16,
+        marginHorizontal: 16, // Adicionado para alinhar com a lista
+        marginTop: 16,       // Adicionado para espaçamento
         elevation: 2,
+        height: 50, // Altura fixa para a barra de pesquisa
     },
     search: {
         flex: 1,
@@ -167,7 +163,7 @@ const Estilo = StyleSheet.create({
         color: '#999',
     },
     listContainer: {
-        padding: 16,
+        paddingHorizontal: 16, // Apenas padding horizontal
     },
     listItem: {
         backgroundColor: '#ffffff',
@@ -229,5 +225,3 @@ const Estilo = StyleSheet.create({
         fontWeight: '500',
     }
 });
-
-

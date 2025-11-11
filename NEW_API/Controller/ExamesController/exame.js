@@ -7,10 +7,10 @@ router.get("/", async (req, res) => {
 })
 
 //rota para exibir todas as pessoas
-router.get("/getpessoas", async (req, res) => {
+router.get("/getpacientes", async (req, res) => {
     try {
         const [rows] = await pool.execute(
-            'SELECT * FROM pessoa'
+            'SELECT * FROM paciente'
         )
         res.status(200).json(rows);
     } catch (error) {
@@ -73,10 +73,10 @@ router.post("/insertexame", async (req, res) => {
 })
 
 //rota para mostar pessoa por nome ou cpf
-router.get("/getpessoa", async (req, res) => {
+router.get("/getpaciente", async (req, res) => {
     try {
         const { nome } = req.query;
-        let query = 'SELECT * FROM pessoa';
+        let query = 'SELECT * FROM paciente';
         let params = [];
 
         // Se um nome foi fornecido, adiciona a condição WHERE
