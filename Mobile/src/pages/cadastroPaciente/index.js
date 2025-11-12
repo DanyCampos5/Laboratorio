@@ -1,163 +1,198 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, Alert } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
 
 export default function Paciente() {
-  const API_URL = "http://localhost:3000/pacientes";
-
   const [paciente, setPaciente] = useState({
     nome: "",
-    dataNascimento: "",
     telefone: "",
     email: "",
+    dataNascimento: "",
     sexo: "",
-    nomeMae: "",
-    periodo: "",
   });
 
-  const [listaPacientes, setListaPacientes] = useState([]);
-  const [editandoId, setEditandoId] = useState(null);
+  const [pacientes, setPacientes] = useState([]);
+  const [busca, setBusca] = useState("");
 
-  //  Buscar todos os pacientes
-  const carregarPacientes = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/getpacientes`);
-      setListaPacientes(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar pacientes:", error);
-      Alert.alert("Erro", "Não foi possível carregar os pacientes.");
-    }
-  };
-
-  useEffect(() => {
-    carregarPacientes();
-  }, []);
-
-  // Inserir paciente
-  const salvarPaciente = async () => {
-    try {
-      if (editandoId) {
-        await axios.put(`${API_URL}/updatepaciente/${editandoId}`, paciente);
-        Alert.alert("✅", "Paciente atualizado com sucesso!");
-      } else {
-        await axios.post(`${API_URL}/insertpaciente`, paciente);
-        Alert.alert("✅", "Paciente cadastrado com sucesso!");
-      }
-
-      setPaciente({
-        nome: "",
-        dataNascimento: "",
-        telefone: "",
-        email: "",
-        sexo: "",
-        nomeMae: "",
-        periodo: "",
-      });
-      setEditandoId(null);
-      carregarPacientes();
-    } catch (error) {
-      console.error("Erro ao salvar paciente:", error);
-      Alert.alert("Erro", "Falha ao salvar paciente.");
-    }
-  };
-
-  //  Excluir paciente
-  const excluirPaciente = async (id) => {
-    Alert.alert("Confirmação", "Deseja realmente excluir este paciente?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Excluir",
-        onPress: async () => {
-          try {
-            await axios.delete(`${API_URL}/deletepaciente/${id}`);
-            carregarPacientes();
-          } catch (error) {
-            console.error("Erro ao excluir:", error);
-            Alert.alert("Erro", "Falha ao excluir paciente.");
-          }
-        },
-      },
-    ]);
-  };
-
-  // Editar paciente
-  const editarPaciente = (item) => {
+  function salvar() {
+    if (!paciente.nome.trim()) return;
+    const novo = {
+      ...paciente,
+      data: new Date().toLocaleDateString("pt-BR"),
+    };
+    setPacientes([...pacientes, novo]);
     setPaciente({
-      nome: item.nome,
-      dataNascimento: item.dataNascimento,
-      telefone: item.telefone,
-      email: item.email,
-      sexo: item.sexo,
-      nomeMae: item.nomeMae,
-      periodo: item.periodo,
+      nome: "",
+      telefone: "",
+      email: "",
+      dataNascimento: "",
+      sexo: "",
     });
-    setEditandoId(item.idPaciente);
-  };
+  }
+
+  function excluir(index) {
+    const lista = [...pacientes];
+    lista.splice(index, 1);
+    setPacientes(lista);
+  }
+
+  function editar(index) {
+    const p = pacientes[index];
+    setPaciente(p);
+    excluir(index);
+  }
+
+  const filtrados = pacientes.filter((p) =>
+    p.nome.toLowerCase().includes(busca.toLowerCase())
+  );
 
   return (
-    <View style={Estilo.fundo}>
-      <View style={Estilo.ficha}>
-        <View style={Estilo.header}>
-          <MaterialIcons name="account-circle" size={60} color="#fff" />
-          <Text style={Estilo.txtLogin}>{editandoId ? "Editar Paciente" : "Cadastro de Paciente"}</Text>
-        </View>
+    <View style={estilo.container}>
 
-        <View style={Estilo.body}>
-          {Object.keys(paciente).map((campo) => (
-            <View key={campo}>
-              <Text style={Estilo.label}>{campo.charAt(0).toUpperCase() + campo.slice(1)}:</Text>
-              <TextInput
-                style={Estilo.input}
-                value={paciente[campo]}
-                placeholder={`Digite ${campo}`}
-                onChangeText={(texto) => setPaciente({ ...paciente, [campo]: texto })}
-              />
-            </View>
-          ))}
-        </View>
+      <View style={estilo.prancheta}>
+        <Text style={estilo.titulo}>Cadastrar Paciente</Text>
 
-        <TouchableOpacity style={Estilo.botao} onPress={salvarPaciente}>
-          <Text style={Estilo.textoBotao}>{editandoId ? "Atualizar" : "Salvar"}</Text>
+        <TextInput
+          style={estilo.input}
+          placeholder="Nome completo"
+          value={paciente.nome}
+          onChangeText={(v) => setPaciente({ ...paciente, nome: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Telefone"
+          keyboardType="number-pad"
+          value={paciente.telefone}
+          onChangeText={(v) => setPaciente({ ...paciente, telefone: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Email"
+          value={paciente.email}
+          onChangeText={(v) => setPaciente({ ...paciente, email: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Data de nascimento"
+          value={paciente.dataNascimento}
+          onChangeText={(v) => setPaciente({ ...paciente, dataNascimento: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Sexo"
+          value={paciente.sexo}
+          onChangeText={(v) => setPaciente({ ...paciente, sexo: v })}
+        />
+
+        <TouchableOpacity style={estilo.botao} onPress={salvar}>
+          <Text style={estilo.textoBotao}>Salvar</Text>
         </TouchableOpacity>
+      </View>
 
-        <FlatList
-          style={{ marginTop: 20 }}
-          data={listaPacientes}
-          keyExtractor={(item) => item.idPaciente.toString()}
-          renderItem={({ item }) => (
-            <View style={Estilo.itemLista}>
-              <View style={{ flex: 1 }}>
-                <Text style={Estilo.nomePaciente}>{item.nome}</Text>
-                <Text style={Estilo.infoPaciente}>{item.telefone}</Text>
-              </View>
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <TouchableOpacity onPress={() => editarPaciente(item)}>
-                  <MaterialIcons name="edit" size={28} color="#007bff" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}>
-                  <MaterialIcons name="delete" size={28} color="#ff4d4d" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+      <View style={estilo.searchBox}>
+        <MaterialIcons name="search" size={24} color="#003366" />
+        <TextInput
+          style={estilo.searchInput}
+          placeholder="Pesquisar paciente"
+          placeholderTextColor="#6d6d6d"
+          value={busca}
+          onChangeText={setBusca}
         />
       </View>
+
+      <FlatList
+        data={filtrados}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={estilo.card}>
+            <View>
+              <Text style={estilo.nome}>{item.nome}</Text>
+              <Text>{item.telefone}</Text>
+              <Text>{item.email}</Text>
+              <Text>{item.dataNascimento}</Text>
+              <Text>{item.sexo}</Text>
+              <Text style={estilo.dataTxt}>Data: {item.data}</Text>
+            </View>
+
+            <View style={estilo.icons}>
+              <TouchableOpacity onPress={() => editar(index)}>
+                <MaterialIcons name="edit" size={28} color="#007bff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => excluir(index)}>
+                <MaterialIcons name="delete" size={28} color="#ff4d4d" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }
 
-const Estilo = StyleSheet.create({
-  fundo: { flex: 1, backgroundColor: "#001f33", alignItems: "center", padding: 20 },
-  ficha: { width: "100%", borderColor: "#d3d3d3", borderWidth: 2, borderRadius: 12, padding: 20 },
-  header: { alignItems: "center", marginBottom: 20 },
-  txtLogin: { fontSize: 20, fontWeight: "bold", color: "#fff" },
-  body: { width: "100%", marginBottom: 20 },
-  label: { color: "#fff", fontSize: 14, marginBottom: 5 },
-  input: { backgroundColor: "#E9F8FF", borderRadius: 6, padding: 8, marginBottom: 12 },
-  botao: { backgroundColor: "#00c817", padding: 12, borderRadius: 8, alignItems: "center" },
-  textoBotao: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  itemLista: { flexDirection: "row", alignItems: "center", backgroundColor: "#e9f8ff", padding: 10, borderRadius: 8, marginBottom: 8 },
-  nomePaciente: { fontWeight: "bold", color: "#001f33" },
-  infoPaciente: { color: "#333" },
+const estilo = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+
+  prancheta: {
+    backgroundColor: "rgba(255,255,255,0.55)",
+    borderWidth: 3,
+    borderColor: "#007bff33",
+    borderRadius: 14,
+    padding: 20,
+    marginBottom: 25,
+  },
+
+  titulo: { textAlign: "center", fontSize: 20, fontWeight: "700", marginBottom: 18 },
+
+  input: {
+    backgroundColor: "rgba(255,255,255,0.45)",
+    borderWidth: 2,
+    borderColor: "#007bff33",
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 12,
+    color: "#003366",
+  },
+
+  botao: {
+    backgroundColor: "#28a745",
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginTop: 5,
+  },
+
+  textoBotao: { textAlign: "center", color: "#fff", fontWeight: "700" },
+
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.45)",
+    borderWidth: 2,
+    borderColor: "#007bff33",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+  },
+
+  searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
+
+  card: {
+    backgroundColor: "rgba(255,255,255,0.45)",
+    borderWidth: 2,
+    borderColor: "#007bff33",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  nome: { fontWeight: "700", fontSize: 16 },
+  dataTxt: { marginTop: 4, fontSize: 12 },
+  icons: { flexDirection: "row", gap: 18, alignItems: "center" },
 });
