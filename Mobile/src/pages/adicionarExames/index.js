@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AdicionarExames({ route }) {
-    const { pessoaId } = route.params;
+    const { pacienteId } = route.params;
     const navigation = useNavigation();
     
     const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ export default function AdicionarExames({ route }) {
                 resultado: resultado,
                 laboratorio: laboratorio,
                 exame: exame,
-                idPaciente: pessoaId,
+                idPaciente: pacienteId,
                 idLabImun: null
             };
             console.log('Corpo enviado para API:', body);
