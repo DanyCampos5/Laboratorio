@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+
 
 import Home from './src/pages/home';
 import ExamesStack from './src/pages/exames/ExamesStack';
@@ -9,18 +10,48 @@ import Paciente from './src/pages/cadastroPaciente';
 import TipagemSanguinea from './src/pages/LabImuno';
 import ResultadoLaudo from './src/pages/Laudo';
 
-const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator screenOptions={{ headerShown: false }}>
-        <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="Exames" component={ExamesStack} />
-        <Tab.Screen name="Paciente" component={Paciente} />
-        <Tab.Screen name="Tipagem" component={TipagemSanguinea} />
-        <Tab.Screen name="Laudo" component={ResultadoLaudo} />
-      </Tab.Navigator>
+      <Drawer.Navigator
+        screenOptions={{
+          headerShown: true, // mostra o cabeçalho com o botão de menu
+          drawerType: 'front', // pode trocar pra 'slide' ou 'permanent'
+          drawerActiveTintColor: '#007BFF', // cor do item ativo
+          drawerLabelStyle: {
+            fontSize: 16,
+            fontWeight: '500',
+          },
+        }}
+      >
+        <Drawer.Screen 
+          name="Home" 
+          component={Home} 
+          options={{ drawerLabel: 'Início' }} 
+        />
+        <Drawer.Screen 
+          name="Exames" 
+          component={ExamesStack} 
+          options={{ drawerLabel: 'Exames' }} 
+        />
+        <Drawer.Screen 
+          name="Paciente" 
+          component={Paciente} 
+          options={{ drawerLabel: 'Pacientes' }} 
+        />
+        <Drawer.Screen 
+          name="Tipagem" 
+          component={TipagemSanguinea} 
+          options={{ drawerLabel: 'Tipagem Sanguínea' }} 
+        />
+        <Drawer.Screen 
+          name="Laudo" 
+          component={ResultadoLaudo} 
+          options={{ drawerLabel: 'Laudos' }} 
+        />
+      </Drawer.Navigator>
     </NavigationContainer>
   );
 }
