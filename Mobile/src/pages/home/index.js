@@ -1,110 +1,116 @@
+import React from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Platform } from "react-native";
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Home() {
-    const navigation = useNavigation();
-    return(
-    <View style={Estilo.container}>
-        <View style={Estilo.topBar}>
-            <Text style={Estilo.textobarra}>HOME</Text>
-        </View>
-        
-      <View style={Estilo.mainArea}>
-        <View style={Estilo.content}>
-            <TouchableOpacity 
-                style={Estilo.botao}
-                onPress={() => navigation.navigate('Usuario')}
-                activeOpacity={0.7}
-            >
-                <MaterialIcons name="person" size={24} color="#fff" />
-                <Text style={Estilo.textobotao}>USUÁRIO</Text>
-            </TouchableOpacity>
+  const navigation = useNavigation();
 
-            <TouchableOpacity 
-                style={Estilo.botao}
-                onPress={() => navigation.navigate('Exames')}
-                activeOpacity={0.7}
-            >
-                <MaterialIcons name="science" size={24} color="#fff" />
-                <Text style={Estilo.textobotao}>EXAMES</Text>
-            </TouchableOpacity>
+  return (
+    <LinearGradient
+      colors={["#E3F2FD", "#FFFFFF"]}
+      style={styles.container}
+    >
+      {/* Topo */}
+      <View style={styles.topBar}>
+        <Text style={styles.title}>Acesso Rapido</Text>
+      </View>
 
-            <TouchableOpacity 
-                style={Estilo.botao}
-                onPress={() => navigation.navigate('Laudo')}
-                activeOpacity={0.7}
-            >
-                <MaterialIcons name="description" size={24} color="#fff" />
-                <Text style={Estilo.textobotao}>LAUDOS</Text>
-            </TouchableOpacity>
+      {/* Conteúdo principal */}
+      <View style={styles.mainArea}>
 
-            <TouchableOpacity 
-                style={Estilo.botao}
-                onPress={() => navigation.navigate('Pacientes')}
-                activeOpacity={0.7}
-            >
-                <MaterialIcons name="people" size={24} color="#fff" />
-                <Text style={Estilo.textobotao}>PACIENTES</Text>
-            </TouchableOpacity>
+        <View style={styles.content}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Usuario")}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="person" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>USUÁRIO</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Exames")}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="science" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>EXAMES</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Laudo")}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="description" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>LAUDOS</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Pacientes")}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="people" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>PACIENTES</Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </View>
-    );
+    </LinearGradient>
+  );
 }
 
-const Estilo = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    flexDirection: "column"
   },
   topBar: {
-    height: Platform.OS === 'ios' ? 90 : 60,
-    backgroundColor: "#007BFF",
-    justifyContent: "center",
+    paddingTop: Platform.OS === "ios" ? 50 : 30,
     alignItems: "center",
-    paddingTop: Platform.OS === 'ios' ? 40 : 10,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
-  textobarra: {
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "600"
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  botao: {
-    backgroundColor: "#007BFF",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    width: "100%",
-    maxWidth: 280,
-    alignItems: "center",
-    flexDirection: "row",
-    marginBottom: 16,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  textobotao: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 12
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#007BFF",
   },
   mainArea: {
     flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 20,
+    marginLeft: 4,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    gap: 16,
+  },
+  button: {
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    width: "100%",
+    maxWidth: 300,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#007BFF",
+    marginLeft: 12,
   },
 });

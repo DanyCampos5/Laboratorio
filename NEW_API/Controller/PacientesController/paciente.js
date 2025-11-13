@@ -8,19 +8,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ⚠️ SUBSTITUA ESTA FUNÇÃO PELO SEU MIDDLEWARE REAL DE AUTENTICAÇÃO JWT
+// Este é apenas um placeholder para mostrar onde aplicar.
+const verificarToken = (req, res, next) => { 
+    // Lógica para verificar o token JWT aqui
+    // Se o token for válido, chame next()
+    // Se o token for inválido, retorne res.status(401).json({ error: true, message: "Não autorizado" });
+    next(); 
+};
+// ⚠️ FIM DA SEÇÃO A SER SUBSTITUÍDA
+
 router.get("/", async (req, res) => {
     res.json({ status: "Ok" });
 });
 
-// GET em pacientes
-router.get("/getpacientes", async (req, res) => {
+// GET todos pacientes - AGORA PROTEGIDA POR TOKEN
+router.get("/getpacientes", verificarToken, async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM paciente;');
-
-        setTimeout(() => {
-            console.log("Simulando um delay de API");
-            res.status(202).json(rows);
-        }, 5000);
+        res.status(200).json(rows);
 
     } catch (error) {
         console.error("Erro ao realizar consulta: ", error);
@@ -28,8 +34,8 @@ router.get("/getpacientes", async (req, res) => {
     }
 });
 
-// Buscar paciente específico
-router.get("/getpaciente/:id", async (req, res) => {
+// GET paciente específico - AGORA PROTEGIDA POR TOKEN
+router.get("/getpaciente/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -49,8 +55,8 @@ router.get("/getpaciente/:id", async (req, res) => {
     }
 });
 
-// Inserindo um novo paciente
-router.post("/insertpaciente", async (req, res) => {
+// POST inserir paciente - AGORA PROTEGIDA POR TOKEN
+router.post("/", verificarToken, async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
 
@@ -60,14 +66,14 @@ router.post("/insertpaciente", async (req, res) => {
 
         const [result] = await pool.execute(
             `INSERT INTO paciente (nome, dataNascimento, telefone, email, sexo, nomeMae, periodo)
-             VALUES(?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [nome, dataNascimento, telefone, email, sexo, nomeMae, periodo]
         );
 
         if (result.affectedRows > 0)
-            res.status(201).json({ error: false, message: "Paciente inserido com sucesso" });
-        else
-            res.status(400).json({ error: true, message: "Erro ao inserir paciente" });
+            return res.status(201).json({ error: false, message: "Paciente inserido com sucesso" });
+
+        return res.status(400).json({ error: true, message: "Erro ao inserir paciente" });
 
     } catch (error) {
         console.error("Erro ao inserir paciente: ", error);
@@ -75,8 +81,8 @@ router.post("/insertpaciente", async (req, res) => {
     }
 });
 
-// Atualizando paciente
-router.put("/updatepaciente/:id", async (req, res) => {
+// PUT atualizar paciente - AGORA PROTEGIDA POR TOKEN
+router.put("/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
@@ -108,8 +114,8 @@ router.put("/updatepaciente/:id", async (req, res) => {
     }
 });
 
-// Removendo paciente
-router.delete("/deletepaciente/:id", async (req, res) => {
+// DELETE remover paciente - AGORA PROTEGIDA POR TOKEN
+router.delete("/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -128,6 +134,5 @@ router.delete("/deletepaciente/:id", async (req, res) => {
         res.status(500).json({ error: true, message: "Erro interno ao remover paciente" });
     }
 });
-
 
 module.exports = router;
