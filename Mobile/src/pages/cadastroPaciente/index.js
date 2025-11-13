@@ -1,25 +1,14 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 
 export default function Paciente() {
-  const API_URL = "http://localhost:3000/cadastroPaciente/getpacientes"; // ⚠️ troque pelo IP da sua máquina
-
   const [paciente, setPaciente] = useState({
     nome: "",
+    dataNascimento: "",
     telefone: "",
     email: "",
-    dataNascimento: "",
     sexo: "",
     nomeMae: "",
     periodo: "",
@@ -27,148 +16,86 @@ export default function Paciente() {
 
   const [pacientes, setPacientes] = useState([]);
   const [busca, setBusca] = useState("");
-  const [editandoId, setEditandoId] = useState(null);
-  const [carregando, setCarregando] = useState(false);
 
-  useEffect(() => {
-    buscarPacientes();
-  }, []);
-
-  // 🔹 Buscar pacientes do backend
-  const buscarPacientes = async () => {
-    try {
-      setCarregando(true);
-      const { data } = await axios.get(`${API_URL}/getpacientes`);
-      setPacientes(data);
-    } catch (error) {
-      console.error("Erro ao buscar pacientes:", error);
-      Alert.alert("Erro", "Não foi possível carregar os pacientes.");
-    } finally {
-      setCarregando(false);
-    }
-  };
-
-  // 🔹 Salvar ou atualizar paciente
-  const salvarPaciente = async () => {
-    try {
-      if (!paciente.nome.trim() || !paciente.telefone.trim() || !paciente.email.trim()) {
-        Alert.alert("Atenção", "Preencha os campos obrigatórios: Nome, Telefone e Email.");
-        return;
-      }
-
-      if (editandoId) {
-        await axios.put(`${API_URL}/updatepaciente/${editandoId}`, paciente);
-        Alert.alert("Sucesso", "Paciente atualizado!");
-      } else {
-        await axios.post(`${API_URL}/insertpaciente`, paciente);
-        Alert.alert("Sucesso", "Paciente cadastrado!");
-      }
-
-      limparCampos();
-      buscarPacientes();
-    } catch (error) {
-      console.error("Erro ao salvar paciente:", error);
-      Alert.alert("Erro", "Não foi possível salvar o paciente.");
-    }
-  };
-
-  // 🔹 Editar paciente (carrega os dados nos inputs)
-  const editarPaciente = (item) => {
-    setPaciente({
-      nome: item.nome || "",
-      telefone: item.telefone || "",
-      email: item.email || "",
-      dataNascimento: item.dataNascimento
-        ? item.dataNascimento.split("T")[0]
-        : "",
-      sexo: item.sexo || "",
-      nomeMae: item.nomeMae || "",
-      periodo: item.periodo || "",
-    });
-    setEditandoId(item.idPaciente);
-  };
-
-  // 🔹 Excluir paciente
-  const excluirPaciente = async (id) => {
-    Alert.alert(
-      "Excluir paciente",
-      "Tem certeza que deseja excluir este paciente?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await axios.delete(`${API_URL}/deletepaciente/${id}`);
-              Alert.alert("Sucesso", "Paciente excluído!");
-              buscarPacientes();
-            } catch (error) {
-              console.error("Erro ao excluir paciente:", error);
-              Alert.alert("Erro", "Não foi possível excluir o paciente.");
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  // 🔹 Limpar formulário
-  const limparCampos = () => {
+  function salvar() {
+    if (!paciente.nome.trim()) return;
+    const novo = {
+      ...paciente,
+      data: new Date().toLocaleDateString("pt-BR"),
+    };
+    setPacientes([...pacientes, novo]);
     setPaciente({
       nome: "",
       telefone: "",
       email: "",
       dataNascimento: "",
       sexo: "",
-      nomeMae: "",
-      periodo: "",
     });
-    setEditandoId(null);
-  };
+  }
+
+  function excluir(index) {
+    const lista = [...pacientes];
+    lista.splice(index, 1);
+    setPacientes(lista);
+  }
+
+  function editar(index) {
+    const p = pacientes[index];
+    setPaciente(p);
+    excluir(index);
+  }
 
   const filtrados = pacientes.filter((p) =>
-    p.nome?.toLowerCase().includes(busca.toLowerCase())
+    p.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
     <View style={estilo.container}>
-      {/* 📋 Formulário */}
+
       <View style={estilo.prancheta}>
-        <View style={estilo.header}>
-          <MaterialIcons name="assignment" size={60} color="#FFD700" />
-          <Text style={estilo.titulo}>
-            {editandoId ? "Editar Paciente" : "Cadastro de Paciente"}
-          </Text>
-        </View>
+        <Text style={estilo.titulo}>Cadastrar Paciente</Text>
 
-        {[
-          { placeholder: "Nome completo", key: "nome" },
-          { placeholder: "Telefone", key: "telefone" },
-          { placeholder: "Email", key: "email" },
-          { placeholder: "Data de nascimento (YYYY-MM-DD)", key: "dataNascimento" },
-          { placeholder: "Sexo", key: "sexo" },
-          { placeholder: "Nome da mãe", key: "nomeMae" },
-          { placeholder: "Período (Ex: Matutino)", key: "periodo" },
-        ].map((campo, i) => (
-          <TextInput
-            key={i}
-            style={estilo.input}
-            placeholder={campo.placeholder}
-            placeholderTextColor="#666"
-            value={paciente[campo.key]}
-            onChangeText={(v) => setPaciente({ ...paciente, [campo.key]: v })}
-          />
-        ))}
+        <TextInput
+          style={estilo.input}
+          placeholder="Nome completo"
+          value={paciente.nome}
+          onChangeText={(v) => setPaciente({ ...paciente, nome: v })}
+        />
 
-        <TouchableOpacity style={estilo.botao} onPress={salvarPaciente}>
-          <Text style={estilo.textoBotao}>
-            {editandoId ? "Atualizar" : "Salvar"}
-          </Text>
+        <TextInput
+          style={estilo.input}
+          placeholder="Telefone"
+          keyboardType="number-pad"
+          value={paciente.telefone}
+          onChangeText={(v) => setPaciente({ ...paciente, telefone: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Email"
+          value={paciente.email}
+          onChangeText={(v) => setPaciente({ ...paciente, email: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Data de nascimento"
+          value={paciente.dataNascimento}
+          onChangeText={(v) => setPaciente({ ...paciente, dataNascimento: v })}
+        />
+
+        <TextInput
+          style={estilo.input}
+          placeholder="Sexo"
+          value={paciente.sexo}
+          onChangeText={(v) => setPaciente({ ...paciente, sexo: v })}
+        />
+
+        <TouchableOpacity style={estilo.botao} onPress={salvar}>
+          <Text style={estilo.textoBotao}>Salvar</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 🔍 Busca */}
       <View style={estilo.searchBox}>
         <MaterialIcons name="search" size={24} color="#003366" />
         <TextInput
@@ -180,41 +107,32 @@ export default function Paciente() {
         />
       </View>
 
-      {/* 📄 Lista */}
-      {carregando ? (
-        <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={filtrados}
-          keyExtractor={(item) => item.idPaciente.toString()}
-          ListEmptyComponent={
-            <Text style={{ textAlign: "center", color: "#777", marginTop: 20 }}>
-              Nenhum paciente encontrado
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <View style={estilo.card}>
-              <View style={{ flex: 1 }}>
-                <Text style={estilo.nome}>{item.nome}</Text>
-                <Text>{item.telefone}</Text>
-                <Text>{item.email}</Text>
-                <Text>{item.dataNascimento?.split("T")[0]}</Text>
-                <Text>{item.sexo}</Text>
-                <Text>{item.nomeMae}</Text>
-                <Text>{item.periodo}</Text>
-              </View>
-              <View style={estilo.icons}>
-                <TouchableOpacity onPress={() => editarPaciente(item)}>
-                  <MaterialIcons name="edit" size={28} color="#007bff" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}>
-                  <MaterialIcons name="delete" size={28} color="#ff4d4d" />
-                </TouchableOpacity>
-              </View>
+      <FlatList
+        data={filtrados}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={estilo.card}>
+            <View>
+              <Text style={estilo.nome}>{item.nome}</Text>
+              <Text>{item.telefone}</Text>
+              <Text>{item.email}</Text>
+              <Text>{item.dataNascimento}</Text>
+              <Text>{item.sexo}</Text>
+              <Text style={estilo.dataTxt}>Data: {item.data}</Text>
             </View>
-          )}
-        />
-      )}
+
+            <View style={estilo.icons}>
+              <TouchableOpacity onPress={() => editar(index)}>
+                <MaterialIcons name="edit" size={28} color="#007bff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => excluir(index)}>
+                <MaterialIcons name="delete" size={28} color="#ff4d4d" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }
@@ -223,24 +141,23 @@ const estilo = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
 
   prancheta: {
-    backgroundColor: "#f9f9ff",
-    borderWidth: 2,
+    backgroundColor: "rgba(255,255,255,0.55)",
+    borderWidth: 3,
     borderColor: "#007bff33",
     borderRadius: 14,
     padding: 20,
     marginBottom: 25,
   },
 
-  header: { alignItems: "center", marginBottom: 15 },
-  titulo: { fontSize: 20, fontWeight: "700", color: "#003366" },
+  titulo: { textAlign: "center", fontSize: 20, fontWeight: "700", marginBottom: 18 },
 
   input: {
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
+    backgroundColor: "rgba(255,255,255,0.45)",
+    borderWidth: 2,
     borderColor: "#007bff33",
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
+    padding: 14,
+    marginBottom: 12,
     color: "#003366",
   },
 
@@ -250,24 +167,27 @@ const estilo = StyleSheet.create({
     borderRadius: 8,
     marginTop: 5,
   },
+
   textoBotao: { textAlign: "center", color: "#fff", fontWeight: "700" },
 
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1.5,
+    backgroundColor: "rgba(255,255,255,0.45)",
+    borderWidth: 2,
     borderColor: "#007bff33",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
     marginBottom: 10,
   },
+
   searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
 
   card: {
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#007bff22",
+    backgroundColor: "rgba(255,255,255,0.45)",
+    borderWidth: 2,
+    borderColor: "#007bff33",
     borderRadius: 10,
     padding: 14,
     marginBottom: 12,
@@ -275,6 +195,7 @@ const estilo = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
+  nome: { fontWeight: "700", fontSize: 16 },
+  dataTxt: { marginTop: 4, fontSize: 12 },
   icons: { flexDirection: "row", gap: 18, alignItems: "center" },
 });
