@@ -13,7 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 
 export default function Paciente() {
-  const API_URL = "http://192.168.0.105:3000/pacientes"; // ⚠️ troque pelo IP da sua máquina
+  const API_URL = "http://localhost:3000/cadastroPaciente/getpacientes"; // ⚠️ troque pelo IP da sua máquina
 
   const [paciente, setPaciente] = useState({
     nome: "",
