@@ -1,14 +1,12 @@
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
-
-import Home from './src/pages/home';
-import ExamesStack from './src/pages/exames/ExamesStack';
 import Paciente from './src/pages/cadastroPaciente';
+import ExamesStack from './src/pages/exames/ExamesStack';
+import Home from './src/pages/home';
 import TipagemSanguinea from './src/pages/LabImuno';
-import ResultadoLaudo from './src/pages/Laudo';
+import LaudoStack from './src/pages/Laudo/LaudoStack';
 
 const Drawer = createDrawerNavigator();
 
@@ -48,7 +46,7 @@ export default function App() {
         />
         <Drawer.Screen 
           name="Laudo" 
-          component={ResultadoLaudo} 
+          component={LaudoStack} 
           options={{ drawerLabel: 'Laudos' }} 
         />
       </Drawer.Navigator>

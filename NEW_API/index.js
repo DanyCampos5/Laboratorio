@@ -3,6 +3,7 @@ const cors = require('cors');
 const usuarioRoutes = require("./Controller/UsuarioController/usuario");
 const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
+const laudoRoutes = require("./Controller/LaudoController/laudo");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/usuarios', usuarioRoutes);
 app.use('/exames', examesRoutes);
 app.use('/pacientes', pacientesRoutes);
+app.use('/laudo', laudoRoutes);
 
 // 🔹 Rota raiz para teste rápido
 app.get('/', (req, res) => {

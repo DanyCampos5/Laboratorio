@@ -1,27 +1,19 @@
-import React from "react";
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-export default function ResultadoLaudo() {
-  const paciente = {
-    nome: "Pedro Liboni",
-    idade: 28,
-    sexo: "M",
-    prontuario: "123456",
-    dataEmissao: "20/06/2024",
-  };
+export default function ResultadoLaudo({ route }) {
 
-  const exames = {
-    tipoExame: "TIPAGEM SANGUINEA ABO(RH)",
-    materialExame: "SANGUE TOTAL",
-    metodoExame: "HEMAGLUTINAÇÃO",
-    grupoSanguineo: "B",
-    fatorRH: "Positivo",
-  };
+  const { laudoData } = route.params;
 
-  const responsavelTecnico = {
-    nome: "EDUARDA CAROLINA DO NASCIMENTO",
-    crf: "3891",
-  };
+  if (!laudoData) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.h2}>Erro</Text>
+        <Text style={styles.p}>Não foi possível carregar os dados do laudo.</Text>
+      </View>
+    );
+  }
+
+  const { paciente, exames, responsavelTecnico } = laudoData;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -103,22 +95,22 @@ export default function ResultadoLaudo() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f0f4f7",
+    backgroundColor: '#f0f4f7',
   },
   scrollContainer: {
     padding: 20,
   },
   container: {
-    fontFamily: "Arial",
+    fontFamily: 'Arial',
     maxWidth: 700,
-    width: "100%",
-    alignSelf: "center",
+    width: '100%',
+    alignSelf: 'center',
     paddingVertical: 20,
     paddingHorizontal: 30,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 12,
- 
-    shadowColor: "rgba(0, 50, 100, 0.2)",
+
+    shadowColor: 'rgba(0, 50, 100, 0.2)',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -129,37 +121,37 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   titulo: {
-    textAlign: "center",
-    color: "#0a3d62",
+    textAlign: 'center',
+    color: '#0a3d62',
     marginBottom: 25,
     fontSize: 26,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   h2: {
-    color: "#1e5f9c",
+    color: '#1e5f9c',
     borderBottomWidth: 2,
-    borderBottomColor: "#cce4f7",
+    borderBottomColor: '#cce4f7',
     paddingBottom: 5,
     marginBottom: 10,
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   section: {
     marginBottom: 20,
   },
   p: {
     marginVertical: 5,
-    color: "#2c3e50",
+    color: '#2c3e50',
     fontSize: 16,
     lineHeight: 22,
   },
   bold: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   rodape: {
     marginTop: 25,
     fontSize: 12,
-    color: "#555",
-    textAlign: "center",
+    color: '#555',
+    textAlign: 'center',
   },
 });
