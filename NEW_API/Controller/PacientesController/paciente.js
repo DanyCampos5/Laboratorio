@@ -56,7 +56,7 @@ router.get("/getpaciente/:id", verificarToken, async (req, res) => {
 });
 
 // POST inserir paciente - AGORA PROTEGIDA POR TOKEN
-router.post("/insertpaciente", verificarToken, async (req, res) => {
+router.post("/", verificarToken, async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
 
@@ -82,7 +82,7 @@ router.post("/insertpaciente", verificarToken, async (req, res) => {
 });
 
 // PUT atualizar paciente - AGORA PROTEGIDA POR TOKEN
-router.put("/updatepaciente/:id", verificarToken, async (req, res) => {
+router.put("/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
@@ -115,7 +115,7 @@ router.put("/updatepaciente/:id", verificarToken, async (req, res) => {
 });
 
 // DELETE remover paciente - AGORA PROTEGIDA POR TOKEN
-router.delete("/deletepaciente/:id", verificarToken, async (req, res) => {
+router.delete("/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
 

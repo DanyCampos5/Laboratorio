@@ -11,10 +11,9 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
-// CORREÇÃO: Importar o hook useNavigation
 import { useNavigation } from '@react-navigation/native';
 
-// Funções auxiliares de formatação de data (sem alterações)
+// Funções auxiliares de formatação de data
 const formatarData = (data) => {
   if (!data) return "";
   try {
@@ -37,19 +36,19 @@ const formatarDataParaInput = (data) => {
 };
 
 export default function Paciente() {
+  // ATENÇÃO: Se estiver usando emulador/dispositivo, troque 'localhost' pelo IP da sua máquina.
   const API_URL = "http://localhost:3000/pacientes"; 
 
   const [paciente, setPaciente] = useState({
     nome: "", telefone: "", email: "", dataNascimento: "",
     sexo: "", nomeMae: "", periodo: "",
-  } );
+  }  );
 
   const [pacientes, setPacientes] = useState([]);
   const [busca, setBusca] = useState("");
   const [editandoId, setEditandoId] = useState(null);
   const [carregando, setCarregando] = useState(false);
   
-  // CORREÇÃO: Agora o hook useNavigation está definido e pode ser usado
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -59,6 +58,7 @@ export default function Paciente() {
   const buscarPacientes = async () => {
     try {
       setCarregando(true);
+      // GET /pacientes/getpacientes
       const { data } = await axios.get(`${API_URL}/getpacientes`); 
       setPacientes(data);
     } catch (error) {
@@ -76,10 +76,12 @@ export default function Paciente() {
         return;
       }
       if (editandoId) {
-        await axios.put(`${API_URL}/updatepaciente/${editandoId}`, paciente);
+        // CORRIGIDO: PUT /pacientes/:id
+        await axios.put(`${API_URL}/${editandoId}`, paciente);
         Alert.alert("Sucesso", "Paciente atualizado!");
       } else {
-        await axios.post(`${API_URL}/insertpaciente`, paciente);
+        // CORRIGIDO: POST /pacientes
+        await axios.post(`${API_URL}`, paciente);
         Alert.alert("Sucesso", "Paciente cadastrado!");
       }
       limparCampos();
@@ -112,7 +114,8 @@ export default function Paciente() {
           text: "Excluir", style: "destructive",
           onPress: async () => {
             try {
-              await axios.delete(`${API_URL}/deletepaciente/${id}`);
+              // CORRIGIDO: DELETE /pacientes/:id
+              await axios.delete(`${API_URL}/${id}`);
               Alert.alert("Sucesso", "Paciente excluído!");
               buscarPacientes();
             } catch (error) {
@@ -139,7 +142,6 @@ export default function Paciente() {
 
   // 🔹 Navegar para adicionar exame
   const irParaAdicionarExame = (pacienteId) => {
-    // CORREÇÃO: Nome do parâmetro corrigido para 'pacienteId' para consistência
     if (pacienteId) {
       navigation.navigate('AdicionarExames', { pacienteId: pacienteId });
     }
@@ -205,7 +207,6 @@ export default function Paciente() {
               <Text>{item.periodo}</Text>
             </View>
             <View style={estilo.icons}>
-              {/* CORREÇÃO: Adicionado botão para adicionar exame */}
               <TouchableOpacity onPress={() => irParaAdicionarExame(item.idPaciente)}>
                 <MaterialIcons name="note-add" size={28} color="#28a745" />
               </TouchableOpacity>
@@ -237,5 +238,5 @@ const estilo = StyleSheet.create({
   searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
   card: { backgroundColor: "#fff", borderWidth: 1.5, borderColor: "#007bff22", borderRadius: 10, padding: 14, marginBottom: 12, flexDirection: "row", justifyContent: "space-between" },
   nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
-  icons: { flexDirection: "row", gap: 18, alignItems: "center" }, // Aumentei o 'gap' para dar mais espaço
+  icons: { flexDirection: "row", gap: 18, alignItems: "center" },
 });
