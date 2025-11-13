@@ -54,6 +54,7 @@ export default function Paciente() {
   const [busca, setBusca] = useState("");
   const [editandoId, setEditandoId] = useState(null);
   const [carregando, setCarregando] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     buscarPacientes();
@@ -143,6 +144,13 @@ export default function Paciente() {
   const filtrados = pacientes.filter((p) =>
     p.nome?.toLowerCase().includes(busca.toLowerCase())
   );
+
+  // 🔹 Navegar para adicionar exame
+  const irParaAdicionarExame = (idPaciente) => {
+    if (idPaciente) {
+      navigation.navigate('AdicionarExames', { idPaciente });
+    }
+  };
 
   return (
     // A tag <ScrollView> foi removida pois a FlatList já implementa rolagem.
@@ -241,5 +249,5 @@ const estilo = StyleSheet.create({
   searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
   card: { backgroundColor: "#fff", borderWidth: 1.5, borderColor: "#007bff22", borderRadius: 10, padding: 14, marginBottom: 12, flexDirection: "row", justifyContent: "space-between" },
   nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
-  icons: { flexDirection: "row", gap: 18, alignItems: "center" },
+  icons: { flexDirection: "row", gap: 15, alignItems: "center" },
 });

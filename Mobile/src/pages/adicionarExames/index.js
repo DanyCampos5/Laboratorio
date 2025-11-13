@@ -69,8 +69,8 @@ export default function AdicionarExames({ route }) {
             console.log('Estado de "loading" definido como true.');
 
             const body = {
-                dataEntrada: dataEntrada,
-                dataExame: dataExame,
+                dataEntrada: formatarData(dataEntrada),
+                dataExame: formatarData(dataExame),
                 resultado: resultado,
                 laboratorio: laboratorio,
                 exame: exame,
@@ -113,14 +113,14 @@ export default function AdicionarExames({ route }) {
     const onChangeDataExame = (event, selectedDate) => {
         setShowDataExamePicker(false);
         if (selectedDate) {
-            setDataExame(selectedDate);
+            setDataExame(selectedDate || dataExame);
         }
     };
 
     const onChangeDataEntrada = (event, selectedDate) => {
         setShowDataEntradaPicker(false);
         if (selectedDate) {
-            setDataEntrada(selectedDate);
+            setDataEntrada(selectedDate || dataEntrada);
         }
     };
 
@@ -174,28 +174,36 @@ export default function AdicionarExames({ route }) {
 
 
                 <View style={styles.field}>
-                    <Text style={styles.label}>Data de Entrada (YYYY-MM-DD):</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={dataEntrada}
-                        onChangeText={setDataEntrada}
-                        placeholder="Ex: 2025-10-29"
-                        placeholderTextColor="#999"
-                        keyboardType="numeric"
-                    />
+                    <Text style={styles.label}>Data de Entrada:</Text>
+                    <TouchableOpacity style={styles.dateButton} onPress={() => setShowDataEntradaPicker(true)}>
+                        <Text style={styles.dateButtonText}>{dataEntrada.toLocaleDateString('pt-BR')}</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.field}>
-                    <Text style={styles.label}>Data do Exame (YYYY-MM-DD):</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={dataExame}
-                        onChangeText={setDataExame}
-                        placeholder="Ex: 2025-10-29"
-                        placeholderTextColor="#999"
-                        keyboardType="numeric"
-                    />
+                    <Text style={styles.label}>Data do Exame:</Text>
+                    <TouchableOpacity style={styles.dateButton} onPress={() => setShowDataExamePicker(true)}>
+                        <Text style={styles.dateButtonText}>{dataExame.toLocaleDateString('pt-BR')}</Text>
+                    </TouchableOpacity>
                 </View>
+
+                {showDataEntradaPicker && (
+                    <DateTimePicker
+                        value={dataEntrada}
+                        mode="date"
+                        display="default"
+                        onChange={onChangeDataEntrada}
+                    />
+                )}
+
+                {showDataExamePicker && (
+                    <DateTimePicker
+                        value={dataExame}
+                        mode="date"
+                        display="default"
+                        onChange={onChangeDataExame}
+                    />
+                )}
 
                 <TouchableOpacity
                     style={styles.saveButton}
