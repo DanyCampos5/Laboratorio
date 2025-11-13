@@ -8,14 +8,13 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  ScrollView, // Adicionar ScrollView
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 
 export default function Paciente() {
-  // A URL base foi corrigida para apontar para o prefixo da rota do backend.
-  // ATENÇÃO: Se estiver usando emulador/dispositivo, troque 'localhost' pelo IP da sua máquina.
-  const API_URL = "http://localhost:3000/cadastroPaciente"; 
+  const API_URL = "http://localhost:3000/pacientes";
 
   const [paciente, setPaciente] = useState({
     nome: "",
@@ -25,7 +24,7 @@ export default function Paciente() {
     sexo: "",
     nomeMae: "",
     periodo: "",
-  } );
+  });
 
   const [pacientes, setPacientes] = useState([]);
   const [busca, setBusca] = useState("");
@@ -36,15 +35,56 @@ export default function Paciente() {
     buscarPacientes();
   }, []);
 
+  // 🧩 Função para formatar datas
+  function formatarData(valor) {
+    if (!valor) return "Não informada";
+
+    if (typeof valor === "number") {
+      const str = valor.toString();
+      if (str.length === 8) {
+        const ano = str.substring(0, 4);
+        const mes = str.substring(4, 6);
+        const dia = str.substring(6, 8);
+        return `${dia}/${mes}/${ano}`;
+      }
+      if (str.length >= 10) {
+        const data = new Date(parseInt(str));
+        return data.toLocaleDateString("pt-BR");
+      }
+    }
+
+    if (typeof valor === "string") {
+      if (valor.includes("T")) return valor.split("T")[0];
+      if (/^\d{8}$/.test(valor)) {
+        const ano = valor.substring(0, 4);
+        const mes = valor.substring(4, 6);
+        const dia = valor.substring(6, 8);
+        return `${dia}/${mes}/${ano}`;
+      }
+      return valor;
+    }
+
+    return "Inválida";
+  }
+
   // 🔹 Buscar pacientes do backend
   const buscarPacientes = async () => {
     try {
       setCarregando(true);
-      // A chamada agora está correta: API_URL + /getpacientes
-      const { data } = await axios.get(`${API_URL}/getpacientes`); 
-      setPacientes(data);
+      const { data } = await axios.get(`${API_URL}/getpacientes`);
+      console.log("📦 Dados recebidos da API:", data);
+
+      // 🔹 Garantir que o estado só é setado com array
+      if (Array.isArray(data)) {
+        setPacientes(data);
+      } else if (data && Array.isArray(data.result)) {
+        setPacientes(data.result);
+      } else {
+        console.warn("⚠️ Resposta inesperada, limpando lista:", data);
+        setPacientes([]);
+      }
     } catch (error) {
-      console.error("Erro ao buscar pacientes:", error);
+      console.error("❌ Erro ao buscar pacientes:", error.message);
       Alert.alert("Erro", "Não foi possível carregar os pacientes.");
     } finally {
       setCarregando(false);
@@ -70,20 +110,18 @@ export default function Paciente() {
       limparCampos();
       buscarPacientes();
     } catch (error) {
-      console.error("Erro ao salvar paciente:", error);
+      console.error("❌ Erro ao salvar paciente:", error.message);
       Alert.alert("Erro", "Não foi possível salvar o paciente.");
     }
   };
 
-  // 🔹 Editar paciente (carrega os dados nos inputs)
+  // 🔹 Editar paciente
   const editarPaciente = (item) => {
     setPaciente({
       nome: item.nome || "",
       telefone: item.telefone || "",
       email: item.email || "",
-      dataNascimento: item.dataNascimento
-        ? item.dataNascimento.split("T")[0]
-        : "",
+      dataNascimento: item.dataNascimento ? formatarData(item.dataNascimento) : "",
       sexo: item.sexo || "",
       nomeMae: item.nomeMae || "",
       periodo: item.periodo || "",
@@ -93,27 +131,23 @@ export default function Paciente() {
 
   // 🔹 Excluir paciente
   const excluirPaciente = async (id) => {
-    Alert.alert(
-      "Excluir paciente",
-      "Tem certeza que deseja excluir este paciente?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await axios.delete(`${API_URL}/deletepaciente/${id}`);
-              Alert.alert("Sucesso", "Paciente excluído!");
-              buscarPacientes();
-            } catch (error) {
-              console.error("Erro ao excluir paciente:", error);
-              Alert.alert("Erro", "Não foi possível excluir o paciente.");
-            }
-          },
+    Alert.alert("Excluir paciente", "Tem certeza que deseja excluir este paciente?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await axios.delete(`${API_URL}/deletepaciente/${id}`);
+            Alert.alert("Sucesso", "Paciente excluído!");
+            buscarPacientes();
+          } catch (error) {
+            console.error("❌ Erro ao excluir paciente:", error.message);
+            Alert.alert("Erro", "Não foi possível excluir o paciente.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   // 🔹 Limpar formulário
@@ -130,12 +164,13 @@ export default function Paciente() {
     setEditandoId(null);
   };
 
+  // 🔹 Filtro de busca
   const filtrados = pacientes.filter((p) =>
     p.nome?.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
-    <View style={estilo.container}>
+    <ScrollView style={estilo.container}>
       {/* 📋 Formulário */}
       <View style={estilo.prancheta}>
         <View style={estilo.header}>
@@ -149,7 +184,7 @@ export default function Paciente() {
           { placeholder: "Nome completo", key: "nome" },
           { placeholder: "Telefone", key: "telefone" },
           { placeholder: "Email", key: "email" },
-          { placeholder: "Data de nascimento (YYYY-MM-DD)", key: "dataNascimento" },
+          { placeholder: "Data de nascimento (YYYYMMDD)", key: "dataNascimento" },
           { placeholder: "Sexo", key: "sexo" },
           { placeholder: "Nome da mãe", key: "nomeMae" },
           { placeholder: "Período (Ex: Matutino)", key: "periodo" },
@@ -189,42 +224,44 @@ export default function Paciente() {
       ) : (
         <FlatList
           data={filtrados}
-          keyExtractor={(item) => item.idPaciente.toString()}
+          keyExtractor={(item, index) => String(item.idPaciente ?? index)}
           ListEmptyComponent={
             <Text style={{ textAlign: "center", color: "#777", marginTop: 20 }}>
               Nenhum paciente encontrado
             </Text>
           }
-          renderItem={({ item }) => (
-            <View style={estilo.card}>
-              <View style={{ flex: 1 }}>
-                <Text style={estilo.nome}>{item.nome}</Text>
-                <Text>{item.telefone}</Text>
-                <Text>{item.email}</Text>
-                <Text>{item.dataNascimento?.split("T")[0]}</Text>
-                <Text>{item.sexo}</Text>
-                <Text>{item.nomeMae}</Text>
-                <Text>{item.periodo}</Text>
+          renderItem={({ item }) => {
+            console.log("🧾 Renderizando item:", item);
+            return (
+              <View style={estilo.card}>
+                <View style={{ flex: 1 }}>
+                  <Text style={estilo.nome}>{item.nome}</Text>
+                  <Text>{item.telefone}</Text>
+                  <Text>{item.email}</Text>
+                  <Text>{formatarData(item.dataNascimento)}</Text>
+                  <Text>{item.sexo}</Text>
+                  <Text>{item.nomeMae}</Text>
+                  <Text>{item.periodo}</Text>
+                </View>
+                <View style={estilo.icons}>
+                  <TouchableOpacity onPress={() => editarPaciente(item)}>
+                    <MaterialIcons name="edit" size={28} color="#007bff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}>
+                    <MaterialIcons name="delete" size={28} color="#ff4d4d" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={estilo.icons}>
-                <TouchableOpacity onPress={() => editarPaciente(item)}>
-                  <MaterialIcons name="edit" size={28} color="#007bff" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}>
-                  <MaterialIcons name="delete" size={28} color="#ff4d4d" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+            );
+          }}
         />
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const estilo = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-
   prancheta: {
     backgroundColor: "#f9f9ff",
     borderWidth: 2,
@@ -233,10 +270,8 @@ const estilo = StyleSheet.create({
     padding: 20,
     marginBottom: 25,
   },
-
   header: { alignItems: "center", marginBottom: 15 },
   titulo: { fontSize: 20, fontWeight: "700", color: "#003366" },
-
   input: {
     backgroundColor: "#fff",
     borderWidth: 1.5,
@@ -246,7 +281,6 @@ const estilo = StyleSheet.create({
     marginBottom: 10,
     color: "#003366",
   },
-
   botao: {
     backgroundColor: "#28a745",
     paddingVertical: 14,
@@ -254,7 +288,6 @@ const estilo = StyleSheet.create({
     marginTop: 5,
   },
   textoBotao: { textAlign: "center", color: "#fff", fontWeight: "700" },
-
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -266,7 +299,6 @@ const estilo = StyleSheet.create({
     marginBottom: 10,
   },
   searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
-
   card: {
     backgroundColor: "#fff",
     borderWidth: 1.5,
@@ -277,7 +309,6 @@ const estilo = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
   nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
   icons: { flexDirection: "row", gap: 18, alignItems: "center" },
 });
