@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 
-const API_URL = 'http://192.168.1.49:3000';
+const API_URL = 'http://localhost:3000';
 
 export default function BuscarLaudo({ navigation }) {
   const [laudoId, setLaudoId] = useState('');
