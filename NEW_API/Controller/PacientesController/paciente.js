@@ -8,12 +8,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ⚠️ SUBSTITUA ESTA FUNÇÃO PELO SEU MIDDLEWARE REAL DE AUTENTICAÇÃO JWT
+// Este é apenas um placeholder para mostrar onde aplicar.
+const verificarToken = (req, res, next) => { 
+    // Lógica para verificar o token JWT aqui
+    // Se o token for válido, chame next()
+    // Se o token for inválido, retorne res.status(401).json({ error: true, message: "Não autorizado" });
+    next(); 
+};
+// ⚠️ FIM DA SEÇÃO A SER SUBSTITUÍDA
+
 router.get("/", async (req, res) => {
     res.json({ status: "Ok" });
 });
 
-// GET todos pacientes
-router.get("/getpacientes", async (req, res) => {
+// GET todos pacientes - AGORA PROTEGIDA POR TOKEN
+router.get("/getpacientes", verificarToken, async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM paciente;');
         res.status(200).json(rows);
@@ -24,8 +34,8 @@ router.get("/getpacientes", async (req, res) => {
     }
 });
 
-// GET paciente específico
-router.get("/getpaciente/:id", async (req, res) => {
+// GET paciente específico - AGORA PROTEGIDA POR TOKEN
+router.get("/getpaciente/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -45,8 +55,8 @@ router.get("/getpaciente/:id", async (req, res) => {
     }
 });
 
-// POST inserir paciente
-router.post("/insertpaciente", async (req, res) => {
+// POST inserir paciente - AGORA PROTEGIDA POR TOKEN
+router.post("/insertpaciente", verificarToken, async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
 
@@ -71,8 +81,8 @@ router.post("/insertpaciente", async (req, res) => {
     }
 });
 
-// PUT atualizar paciente
-router.put("/updatepaciente/:id", async (req, res) => {
+// PUT atualizar paciente - AGORA PROTEGIDA POR TOKEN
+router.put("/updatepaciente/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
@@ -104,8 +114,8 @@ router.put("/updatepaciente/:id", async (req, res) => {
     }
 });
 
-// DELETE remover paciente
-router.delete("/deletepaciente/:id", async (req, res) => {
+// DELETE remover paciente - AGORA PROTEGIDA POR TOKEN
+router.delete("/deletepaciente/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
 
