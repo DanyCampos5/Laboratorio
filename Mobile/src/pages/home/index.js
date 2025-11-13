@@ -50,7 +50,7 @@ export default function Home() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Pacientes")}
+            onPress={() => navigation.navigate("Paciente")}
             activeOpacity={0.8}
           >
             <MaterialIcons name="people" size={26} color="#007BFF" />

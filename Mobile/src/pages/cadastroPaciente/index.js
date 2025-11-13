@@ -12,8 +12,8 @@ const formatarData = (data) => { if (!data) return ""; try { return new Date(dat
 const formatarDataParaInput = (data) => { if (!data) return ""; try { const d = new Date(data); const mes = (d.getUTCMonth() + 1).toString().padStart(2, '0'); const dia = d.getUTCDate().toString().padStart(2, '0'); const ano = d.getUTCFullYear(); return `${ano}-${mes}-${dia}`; } catch (e) { return ""; } };
 
 export default function Paciente() {
-  const API_URL = "http://localhost:3000/pacientes"; 
-  const [paciente, setPaciente] = useState({ nome: "", telefone: "", email: "", dataNascimento: "", sexo: "", nomeMae: "", periodo: "" } );
+  const API_URL = "http://localhost:3000/pacientes";
+  const [paciente, setPaciente] = useState({ nome: "", telefone: "", email: "", dataNascimento: "", sexo: "", nomeMae: "", periodo: "" });
   const [pacientes, setPacientes] = useState([]);
   const [busca, setBusca] = useState("");
   const [editandoId, setEditandoId] = useState(null);
@@ -28,12 +28,12 @@ export default function Paciente() {
     try {
       setCarregando(true);
       const { data } = await axios.get(`${API_URL}/getpacientes`);
-      
+
       if (Array.isArray(data)) {
         setPacientes(data);
       } else {
         console.warn("A API não retornou um array de pacientes. Retorno:", data);
-        setPacientes([]); 
+        setPacientes([]);
       }
 
     } catch (error) {
@@ -112,7 +112,6 @@ export default function Paciente() {
           <>
             <View style={estilo.prancheta}>
               <View style={estilo.header}>
-                <MaterialIcons name="assignment" size={60} color="#FFD700" />
                 <Text style={estilo.titulo}>{editandoId ? "Editar Paciente" : "Cadastro de Paciente"}</Text>
               </View>
               {[
@@ -145,7 +144,6 @@ export default function Paciente() {
               <Text>{item.periodo}</Text>
             </View>
             <View style={estilo.icons}>
-              <TouchableOpacity onPress={() => irParaAdicionarExame(item.idPaciente)}><MaterialIcons name="note-add" size={28} color="#28a745" /></TouchableOpacity>
               <TouchableOpacity onPress={() => editarPaciente(item)}><MaterialIcons name="edit" size={28} color="#007bff" /></TouchableOpacity>
               <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}><MaterialIcons name="delete" size={28} color="#ff4d4d" /></TouchableOpacity>
             </View>

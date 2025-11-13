@@ -37,7 +37,7 @@ export default function App() {
         <Drawer.Screen 
           name="Paciente" 
           component={Paciente} 
-          options={{ drawerLabel: 'Pacientes' }} 
+          options={{ drawerLabel: 'Paciente' }} 
         />
         <Drawer.Screen 
           name="Tipagem" 
