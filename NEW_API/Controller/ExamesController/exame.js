@@ -54,7 +54,7 @@ router.post("/insertexame", async (req, res) => {
                 ?,
                 ?
             )`,
-            [dataEntrada, dataExame, resultado, laboratorio, exame, idPaciente, idLabImun]
+            [dataEntrada, dataExame, resultado, laboratorio, exame, idPaciente, idLabImun || null]
         );
 
         res.status(201).json({
@@ -118,12 +118,8 @@ router.get("/getExames/:idPaciente", async (req, res) => {
             [idPaciente]
         );
 
-        if (rows.length === 0) {
-            return res.status(404).json({
-                error: true,
-                message: "Nenhum exame encontrado para este paciente"
-            });
-        }
+        // Se não houver exames, retorna um array vazio em vez de um erro.
+        // Isso simplifica o tratamento no front-end.
 
         res.status(200).json(rows);
 
@@ -160,20 +156,36 @@ router.put("/editarExame/:id", async (req, res) => {
 })
 
 router.delete("/deletarexame/:id", async (req, res) => {
+    const { id } = req.params;
+    console.log(`[BACK-END] Requisição DELETE recebida para o id: ${id}`);
+
+    if (!id || id === 'undefined') {
+        console.log("[BACK-END] ERRO: ID inválido ou não fornecido.");
+        return res.status(400).json({ error: true, message: "ID do exame é inválido ou não foi fornecido." });
+    }
+
     try {
-        const  { id } = req.params;
+        console.log(`[BACK-END] Executando query no banco: DELETE FROM ExamesSolicitados WHERE idExamesSolicitados = ? com id = ${id}`);
         const [result] = await pool.execute(
             'DELETE FROM ExamesSolicitados WHERE idExamesSolicitados = ?',
             [id]
         );
+
+        console.log('[BACK-END] Resultado da query:', result);
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: true, message: "Exame não encontrado" });
+            console.log(`[BACK-END] Nenhum exame encontrado com o ID ${id}. Nada foi deletado.`);
+            return res.status(404).json({ error: true, message: "Exame não encontrado." });
         }
-        res.status(200).json({ error: false, message: "Exame deletado com sucesso!"});
+
+        console.log(`[BACK-END] Sucesso! ${result.affectedRows} linha(s) deletada(s).`);
+        // Garante que a resposta seja sempre um JSON, mesmo em caso de sucesso.
+        res.status(200).json({ error: false, message: "Exame deletado com sucesso!" });
+
     } catch (error) {
-        console.error("Erro ao deletar: ", error);
-        res.status(500).json({error: true, message: "Erro ao deletar!"});
+        console.error("[BACK-END] Erro crítico ao executar a query de exclusão: ", error);
+        res.status(500).json({ error: true, message: "Erro interno no servidor ao tentar deletar o exame." });
     }
-})
+});
 
 module.exports = router;

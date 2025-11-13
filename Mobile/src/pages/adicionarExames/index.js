@@ -1,9 +1,9 @@
-import { 
-    StyleSheet, 
-    View, 
-    Text, 
-    TextInput, 
-    TouchableOpacity, 
+import {
+    StyleSheet,
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
     ScrollView,
     Alert,
     ActivityIndicator
@@ -13,9 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AdicionarExames({ route }) {
-    const { pessoaId } = route.params;
+    // CORREÇÃO: Alterado de 'pessoaId' para 'pacienteId' para corresponder ao parâmetro passado na navegação.
+    const { pacienteId } = route.params;
     const navigation = useNavigation();
-    
+
     const [loading, setLoading] = useState(false);
     const [exame, setExame] = useState('');
     const [resultado, setResultado] = useState('');
@@ -23,41 +24,62 @@ export default function AdicionarExames({ route }) {
     const [dataExame, setDataExame] = useState('');
     const [dataEntrada, setDataEntrada] = useState('');
 
+    // Substitua a função handleSave em AdicionarExames.js por esta:
     const handleSave = async () => {
+        console.log('--- Botão Salvar Clicado ---');
+        console.log('Verificando campos...');
+        console.log('Exame:', exame);
+        console.log('Laboratório:', laboratorio);
+        console.log('Resultado:', resultado);
+        console.log('Data de Entrada:', dataEntrada);
+        console.log('Data do Exame:', dataExame);
+
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
         if (!exame.trim()) {
+            console.log('ERRO: Nome do exame está vazio.');
             Alert.alert('Erro', 'Por favor, preencha o nome do exame');
             return;
         }
         if (!laboratorio.trim()) {
+            console.log('ERRO: Laboratório está vazio.');
             Alert.alert('Erro', 'Por favor, preencha o nome do laboratório');
             return;
         }
         if (!resultado.trim()) {
+            console.log('ERRO: Resultado está vazio.');
             Alert.alert('Erro', 'Por favor, preencha o resultado');
             return;
         }
         if (!dateRegex.test(dataEntrada)) {
+            console.log('ERRO: Formato da data de entrada é inválido.');
             Alert.alert('Erro', 'Data de entrada inválida. Use o formato YYYY-MM-DD');
             return;
         }
         if (!dateRegex.test(dataExame)) {
+            console.log('ERRO: Formato da data do exame é inválido.');
             Alert.alert('Erro', 'Data do exame inválida. Use o formato YYYY-MM-DD');
             return;
         }
 
+        console.log('Validações passaram. Tentando salvar...');
+
         try {
             setLoading(true);
+            console.log('Estado de "loading" definido como true.');
+
             const body = {
                 dataEntrada: dataEntrada,
                 dataExame: dataExame,
                 resultado: resultado,
                 laboratorio: laboratorio,
                 exame: exame,
-                idPaciente: pessoaId,
+                idPaciente: pacienteId,
                 idLabImun: null
             };
-            console.log('Corpo enviado para API:', body);
+
+            console.log('Corpo enviado para API:', JSON.stringify(body, null, 2));
+
             const response = await fetch('http://localhost:3000/exames/insertexame', {
                 method: 'POST',
                 headers: {
@@ -66,27 +88,27 @@ export default function AdicionarExames({ route }) {
                 body: JSON.stringify(body),
             });
 
-            let data;
-            try {
-                data = await response.json();
-            } catch (jsonError) {
-                console.error('Erro ao converter resposta para JSON:', jsonError);
-                throw jsonError;
-            }
-            console.log('Resposta da API:', data);
+            console.log('Resposta da API recebida. Status:', response.status);
+
+            const data = await response.json();
+            console.log('Dados da resposta:', data);
+
             if (data.error) {
-                Alert.alert('Erro', data.message || 'Erro desconhecido');
+                Alert.alert('Erro na API', data.message || 'Erro desconhecido');
             } else {
                 Alert.alert('Sucesso', 'Exame adicionado com sucesso!');
                 navigation.goBack();
             }
         } catch (error) {
-            console.error('Erro ao salvar:', error);
-            Alert.alert('Erro', 'Não foi possível adicionar o exame');
+            console.error('ERRO CRÍTICO ao salvar:', error);
+            Alert.alert('Erro de Conexão', 'Não foi possível conectar à API para adicionar o exame.');
         } finally {
             setLoading(false);
+            console.log('Estado de "loading" definido como false.');
+            console.log('--- Fim da Função handleSave ---');
         }
     };
+
 
     const onChangeDataExame = (event, selectedDate) => {
         setShowDataExamePicker(false);
@@ -175,7 +197,7 @@ export default function AdicionarExames({ route }) {
                     />
                 </View>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.saveButton}
                     onPress={handleSave}
                 >
