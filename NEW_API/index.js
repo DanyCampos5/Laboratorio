@@ -4,16 +4,24 @@ const usuarioRoutes = require("./Controller/UsuarioController/usuario");
 const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
 
-
 const app = express();
 
+// 🔹 Middlewares globais
 app.use(cors());
-
 app.use(express.json());
 
-app.use('/exames', examesRoutes);
+// 🔹 Rotas
 app.use('/usuarios', usuarioRoutes);
+app.use('/exames', examesRoutes);
 app.use('/pacientes', pacientesRoutes);
 
+// 🔹 Rota raiz para teste rápido
+app.get('/', (req, res) => {
+  res.send('✅ API está rodando! Use /usuarios, /exames ou /pacientes');
+});
+
+// 🔹 Inicialização do servidor
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
