@@ -13,7 +13,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 
 export default function Paciente() {
-  const API_URL = "http://localhost:3000/cadastroPaciente/getpacientes"; // ⚠️ troque pelo IP da sua máquina
+  // A URL base foi corrigida para apontar para o prefixo da rota do backend.
+  // ATENÇÃO: Se estiver usando emulador/dispositivo, troque 'localhost' pelo IP da sua máquina.
+  const API_URL = "http://localhost:3000/cadastroPaciente"; 
 
   const [paciente, setPaciente] = useState({
     nome: "",
@@ -23,7 +25,7 @@ export default function Paciente() {
     sexo: "",
     nomeMae: "",
     periodo: "",
-  });
+  } );
 
   const [pacientes, setPacientes] = useState([]);
   const [busca, setBusca] = useState("");
@@ -38,7 +40,8 @@ export default function Paciente() {
   const buscarPacientes = async () => {
     try {
       setCarregando(true);
-      const { data } = await axios.get(`${API_URL}/getpacientes`);
+      // A chamada agora está correta: API_URL + /getpacientes
+      const { data } = await axios.get(`${API_URL}/getpacientes`); 
       setPacientes(data);
     } catch (error) {
       console.error("Erro ao buscar pacientes:", error);
