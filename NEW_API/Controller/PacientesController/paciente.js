@@ -4,65 +4,44 @@ const router = express.Router();
 const pool = require('../../db');
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// ⚠️ SUBSTITUA ESTA FUNÇÃO PELO SEU MIDDLEWARE REAL DE AUTENTICAÇÃO JWT
-// Este é apenas um placeholder para mostrar onde aplicar.
-const verificarToken = (req, res, next) => { 
-    // Lógica para verificar o token JWT aqui
-    // Se o token for válido, chame next()
-    // Se o token for inválido, retorne res.status(401).json({ error: true, message: "Não autorizado" });
-    next(); 
-};
-// ⚠️ FIM DA SEÇÃO A SER SUBSTITUÍDA
+const verificarToken = (req, res, next) => { next(); };
 
 router.get("/", async (req, res) => {
     res.json({ status: "Ok" });
 });
 
-// GET todos pacientes - AGORA PROTEGIDA POR TOKEN
 router.get("/getpacientes", verificarToken, async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM paciente;');
         res.status(200).json(rows);
-
     } catch (error) {
-        console.error("Erro ao realizar consulta: ", error);
-        res.status(500).json({ error: true, message: "Erro ao buscar pacientes" });
+        res.status(500).json({ error: true });
     }
 });
 
-// GET paciente específico - AGORA PROTEGIDA POR TOKEN
 router.get("/getpaciente/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
-
         const [rows] = await pool.execute(
             'SELECT * FROM paciente WHERE idPaciente = ?',
             [id]
         );
-
         if (rows.length === 0)
-            return res.status(404).json({ error: true, message: "Paciente não encontrado!" });
-
-        res.status(200).json({ error: false, paciente: rows[0] });
-
+            return res.status(404).json({ error: true });
+        res.status(200).json(rows[0]);
     } catch (error) {
-        console.error("Erro ao buscar paciente: ", error);
-        res.status(500).json({ error: true, message: "Erro ao buscar paciente" });
+        res.status(500).json({ error: true });
     }
 });
 
-// POST inserir paciente - AGORA PROTEGIDA POR TOKEN
 router.post("/", verificarToken, async (req, res) => {
     try {
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
-
-        if (!nome || !telefone || !email) {
-            return res.status(400).json({ error: true, message: "Campos obrigatórios não foram informados" });
-        }
+        if (!nome || !telefone || !email)
+            return res.status(400).json({ error: true });
 
         const [result] = await pool.execute(
             `INSERT INTO paciente (nome, dataNascimento, telefone, email, sexo, nomeMae, periodo)
@@ -71,25 +50,21 @@ router.post("/", verificarToken, async (req, res) => {
         );
 
         if (result.affectedRows > 0)
-            return res.status(201).json({ error: false, message: "Paciente inserido com sucesso" });
+            return res.status(201).json({ error: false });
 
-        return res.status(400).json({ error: true, message: "Erro ao inserir paciente" });
-
+        res.status(400).json({ error: true });
     } catch (error) {
-        console.error("Erro ao inserir paciente: ", error);
-        res.status(500).json({ error: true, message: "Erro interno ao inserir paciente" });
+        res.status(500).json({ error: true });
     }
 });
 
-// PUT atualizar paciente - AGORA PROTEGIDA POR TOKEN
 router.put("/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, dataNascimento, telefone, email, sexo, nomeMae, periodo } = req.body;
 
-        if (!nome || !telefone || !email) {
-            return res.status(400).json({ error: true, message: "Campos obrigatórios não foram informados" });
-        }
+        if (!nome || !telefone || !email)
+            return res.status(400).json({ error: true });
 
         const [result] = await pool.execute(
             `UPDATE paciente 
@@ -99,22 +74,14 @@ router.put("/:id", verificarToken, async (req, res) => {
         );
 
         if (result.affectedRows === 0)
-            return res.status(404).json({ error: true, message: "Paciente não encontrado" });
+            return res.status(404).json({ error: true });
 
-        const [rows] = await pool.execute(
-            'SELECT * FROM paciente WHERE idPaciente = ?',
-            [id]
-        );
-
-        res.status(202).json({ error: false, message: "Paciente atualizado com sucesso", paciente: rows[0] });
-
+        res.status(202).json({ error: false });
     } catch (error) {
-        console.error("Erro ao atualizar paciente: ", error);
-        res.status(500).json({ error: true, message: "Erro interno ao atualizar paciente" });
+        res.status(500).json({ error: true });
     }
 });
 
-// DELETE remover paciente - AGORA PROTEGIDA POR TOKEN
 router.delete("/:id", verificarToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -125,13 +92,11 @@ router.delete("/:id", verificarToken, async (req, res) => {
         );
 
         if (result.affectedRows === 0)
-            return res.status(404).json({ error: true, message: "Paciente não encontrado" });
+            return res.status(404).json({ error: true });
 
-        res.status(200).json({ error: false, message: "Paciente removido com sucesso" });
-
+        res.status(200).json({ error: false });
     } catch (error) {
-        console.error("Erro ao remover paciente: ", error);
-        res.status(500).json({ error: true, message: "Erro interno ao remover paciente" });
+        res.status(500).json({ error: true });
     }
 });
 
