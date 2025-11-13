@@ -1,70 +1,111 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from "react";
 import {
+  StyleSheet,
   View,
   Text,
+  TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  StatusBar,
-  Alert,
+  FlatList,
   ActivityIndicator,
-} from 'react-native';
-import axios from 'axios';
-import { Octicons } from '@expo/vector-icons';
+  Alert,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import axios from "axios";
 
-export default function ListaPacientes({ navigation }) {
+export default function Paciente() {
   const API_URL = "http://192.168.0.105:3000/pacientes"; // ⚠️ troque pelo IP da sua máquina
 
+  const [paciente, setPaciente] = useState({
+    nome: "",
+    telefone: "",
+    email: "",
+    dataNascimento: "",
+    sexo: "",
+    nomeMae: "",
+    periodo: "",
+  });
+
   const [pacientes, setPacientes] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [busca, setBusca] = useState("");
+  const [editandoId, setEditandoId] = useState(null);
+  const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    buscarPacientes();
+  }, []);
 
   // 🔹 Buscar pacientes do backend
-  const carregarPacientes = async () => {
-    setLoading(true);
+  const buscarPacientes = async () => {
     try {
+      setCarregando(true);
       const { data } = await axios.get(`${API_URL}/getpacientes`);
       setPacientes(data);
     } catch (error) {
-      console.error('Erro ao carregar pacientes:', error);
-      Alert.alert('Erro', 'Não foi possível carregar a lista de pacientes.');
+      console.error("Erro ao buscar pacientes:", error);
+      Alert.alert("Erro", "Não foi possível carregar os pacientes.");
     } finally {
-      setLoading(false);
+      setCarregando(false);
     }
   };
 
-  useEffect(() => {
-    carregarPacientes();
-  }, []);
+  // 🔹 Salvar ou atualizar paciente
+  const salvarPaciente = async () => {
+    try {
+      if (!paciente.nome.trim() || !paciente.telefone.trim() || !paciente.email.trim()) {
+        Alert.alert("Atenção", "Preencha os campos obrigatórios: Nome, Telefone e Email.");
+        return;
+      }
 
-  // 🔹 Ir para cadastro de novo paciente
-  const handleAddPatient = () => {
-    navigation.navigate('CadastroPacientes');
+      if (editandoId) {
+        await axios.put(`${API_URL}/updatepaciente/${editandoId}`, paciente);
+        Alert.alert("Sucesso", "Paciente atualizado!");
+      } else {
+        await axios.post(`${API_URL}/insertpaciente`, paciente);
+        Alert.alert("Sucesso", "Paciente cadastrado!");
+      }
+
+      limparCampos();
+      buscarPacientes();
+    } catch (error) {
+      console.error("Erro ao salvar paciente:", error);
+      Alert.alert("Erro", "Não foi possível salvar o paciente.");
+    }
   };
 
-  // 🔹 Ir para edição de paciente
-  const handleEditPatient = (paciente) => {
-    navigation.navigate('EditarPaciente', { paciente });
+  // 🔹 Editar paciente (carrega os dados nos inputs)
+  const editarPaciente = (item) => {
+    setPaciente({
+      nome: item.nome || "",
+      telefone: item.telefone || "",
+      email: item.email || "",
+      dataNascimento: item.dataNascimento
+        ? item.dataNascimento.split("T")[0]
+        : "",
+      sexo: item.sexo || "",
+      nomeMae: item.nomeMae || "",
+      periodo: item.periodo || "",
+    });
+    setEditandoId(item.idPaciente);
   };
 
   // 🔹 Excluir paciente
-  const handleDeletePatient = async (paciente) => {
+  const excluirPaciente = async (id) => {
     Alert.alert(
-      'Excluir paciente',
-      `Deseja realmente excluir o paciente ${paciente.nome}?`,
+      "Excluir paciente",
+      "Tem certeza que deseja excluir este paciente?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Excluir',
-          style: 'destructive',
+          text: "Excluir",
+          style: "destructive",
           onPress: async () => {
             try {
-              await axios.delete(`${API_URL}/deletepaciente/${paciente.idPaciente}`);
-              Alert.alert('Sucesso', 'Paciente excluído com sucesso!');
-              carregarPacientes();
+              await axios.delete(`${API_URL}/deletepaciente/${id}`);
+              Alert.alert("Sucesso", "Paciente excluído!");
+              buscarPacientes();
             } catch (error) {
-              console.error('Erro ao excluir paciente:', error);
-              Alert.alert('Erro', 'Não foi possível excluir o paciente.');
+              console.error("Erro ao excluir paciente:", error);
+              Alert.alert("Erro", "Não foi possível excluir o paciente.");
             }
           },
         },
@@ -72,184 +113,168 @@ export default function ListaPacientes({ navigation }) {
     );
   };
 
+  // 🔹 Limpar formulário
+  const limparCampos = () => {
+    setPaciente({
+      nome: "",
+      telefone: "",
+      email: "",
+      dataNascimento: "",
+      sexo: "",
+      nomeMae: "",
+      periodo: "",
+    });
+    setEditandoId(null);
+  };
+
+  const filtrados = pacientes.filter((p) =>
+    p.nome?.toLowerCase().includes(busca.toLowerCase())
+  );
+
   return (
-    <SafeAreaView style={Estilo.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      
-      <View style={Estilo.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={Estilo.backButton}>
-          <Text style={Estilo.backButtonText}>{'<-'} Voltar</Text>
+    <View style={estilo.container}>
+      {/* 📋 Formulário */}
+      <View style={estilo.prancheta}>
+        <View style={estilo.header}>
+          <MaterialIcons name="assignment" size={60} color="#FFD700" />
+          <Text style={estilo.titulo}>
+            {editandoId ? "Editar Paciente" : "Cadastro de Paciente"}
+          </Text>
+        </View>
+
+        {[
+          { placeholder: "Nome completo", key: "nome" },
+          { placeholder: "Telefone", key: "telefone" },
+          { placeholder: "Email", key: "email" },
+          { placeholder: "Data de nascimento (YYYY-MM-DD)", key: "dataNascimento" },
+          { placeholder: "Sexo", key: "sexo" },
+          { placeholder: "Nome da mãe", key: "nomeMae" },
+          { placeholder: "Período (Ex: Matutino)", key: "periodo" },
+        ].map((campo, i) => (
+          <TextInput
+            key={i}
+            style={estilo.input}
+            placeholder={campo.placeholder}
+            placeholderTextColor="#666"
+            value={paciente[campo.key]}
+            onChangeText={(v) => setPaciente({ ...paciente, [campo.key]: v })}
+          />
+        ))}
+
+        <TouchableOpacity style={estilo.botao} onPress={salvarPaciente}>
+          <Text style={estilo.textoBotao}>
+            {editandoId ? "Atualizar" : "Salvar"}
+          </Text>
         </TouchableOpacity>
-        <Text style={Estilo.headerTitle}>Visualizar Pacientes</Text>
       </View>
 
-      {/* Card para adicionar paciente */}
-      <TouchableOpacity style={Estilo.addCard} onPress={handleAddPatient} disabled={loading}>
-        <View style={Estilo.addIconContainer}>
-          <Text style={Estilo.addIcon}>+</Text>
-        </View>
-        <View style={Estilo.cardText}>
-          <Text style={Estilo.cardTitle}>Adicionar Paciente</Text>
-          <Text style={Estilo.cardSubtitle}>Cadastrar novo paciente no sistema</Text>
-        </View>
-      </TouchableOpacity>
+      {/* 🔍 Busca */}
+      <View style={estilo.searchBox}>
+        <MaterialIcons name="search" size={24} color="#003366" />
+        <TextInput
+          style={estilo.searchInput}
+          placeholder="Pesquisar paciente"
+          placeholderTextColor="#6d6d6d"
+          value={busca}
+          onChangeText={setBusca}
+        />
+      </View>
 
-      <ScrollView style={Estilo.content}>
-        {loading && <ActivityIndicator size="large" color="#4285f4" style={{ marginTop: 20 }} />}
-
-        {!loading && pacientes.length === 0 && (
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhum paciente cadastrado.</Text>
-        )}
-
-        {pacientes.map((paciente) => (
-          <View key={paciente.idPaciente} style={Estilo.patientCard}>
-            <View style={Estilo.patientInfo}>
-              <Text style={Estilo.patientName}>{paciente.nome}</Text>
-              <Text style={Estilo.patientDetails}>
-                Data de nascimento: {paciente.dataNascimento?.split('T')[0] || '-'}
-              </Text>
-              <Text style={Estilo.patientDetails}>Telefone: {paciente.telefone}</Text>
-              <Text style={Estilo.patientDetails}>Email: {paciente.email}</Text>
-              <Text style={Estilo.patientDetails}>Sexo: {paciente.sexo}</Text>
-              <Text style={Estilo.patientDetails}>Nome da mãe: {paciente.nomeMae}</Text>
-              <Text style={Estilo.patientDetails}>Período: {paciente.periodo}</Text>
+      {/* 📄 Lista */}
+      {carregando ? (
+        <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={filtrados}
+          keyExtractor={(item) => item.idPaciente.toString()}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", color: "#777", marginTop: 20 }}>
+              Nenhum paciente encontrado
+            </Text>
+          }
+          renderItem={({ item }) => (
+            <View style={estilo.card}>
+              <View style={{ flex: 1 }}>
+                <Text style={estilo.nome}>{item.nome}</Text>
+                <Text>{item.telefone}</Text>
+                <Text>{item.email}</Text>
+                <Text>{item.dataNascimento?.split("T")[0]}</Text>
+                <Text>{item.sexo}</Text>
+                <Text>{item.nomeMae}</Text>
+                <Text>{item.periodo}</Text>
+              </View>
+              <View style={estilo.icons}>
+                <TouchableOpacity onPress={() => editarPaciente(item)}>
+                  <MaterialIcons name="edit" size={28} color="#007bff" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}>
+                  <MaterialIcons name="delete" size={28} color="#ff4d4d" />
+                </TouchableOpacity>
+              </View>
             </View>
-
-            <View style={Estilo.actionsContainer}>
-              <TouchableOpacity
-                style={Estilo.actionButton}
-                onPress={() => handleEditPatient(paciente)}
-              >
-                <Octicons name="pencil" size={20} color="#2480f9" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[Estilo.actionButton, { marginLeft: 10 }]}
-                onPress={() => handleDeletePatient(paciente)}
-              >
-                <Octicons name="trash" size={20} color="#dc3545" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+          )}
+        />
+      )}
+    </View>
   );
 }
 
-const Estilo = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  backButton: {
-    marginRight: 10,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#4285f4',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#212529',
-  },
-  addCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+const estilo = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+
+  prancheta: {
+    backgroundColor: "#f9f9ff",
+    borderWidth: 2,
+    borderColor: "#007bff33",
+    borderRadius: 14,
     padding: 20,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: '#28a745',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    marginBottom: 25,
   },
-  addIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#e8f5e8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+
+  header: { alignItems: "center", marginBottom: 15 },
+  titulo: { fontSize: 20, fontWeight: "700", color: "#003366" },
+
+  input: {
+    backgroundColor: "#fff",
+    borderWidth: 1.5,
+    borderColor: "#007bff33",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+    color: "#003366",
   },
-  addIcon: {
-    fontSize: 24,
-    color: '#28a745',
-    fontWeight: 'bold',
+
+  botao: {
+    backgroundColor: "#28a745",
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginTop: 5,
   },
-  cardText: {
-    flex: 1,
+  textoBotao: { textAlign: "center", color: "#fff", fontWeight: "700" },
+
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#007bff33",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#6c757d',
-    lineHeight: 20,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
-  patientCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
+  searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
+
+  card: {
+    backgroundColor: "#fff",
+    borderWidth: 1.5,
+    borderColor: "#007bff22",
+    borderRadius: 10,
+    padding: 14,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderLeftWidth: 4,
-    borderLeftColor: '#4285f4',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  patientInfo: {
-    flex: 1,
-  },
-  patientName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginBottom: 4,
-  },
-  patientDetails: {
-    fontSize: 14,
-    color: '#6c757d',
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    marginLeft: 16,
-  },
-  actionButton: {
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: '#e9f1ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
+  nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
+  icons: { flexDirection: "row", gap: 18, alignItems: "center" },
 });
