@@ -3,9 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
-  StatusBar,
   Alert,
   TextInput,
   FlatList,
@@ -13,25 +11,22 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
+// CORREÇÃO: Importar o hook useNavigation
+import { useNavigation } from '@react-navigation/native';
 
-// Função auxiliar para formatar a data de forma segura
+// Funções auxiliares de formatação de data (sem alterações)
 const formatarData = (data) => {
-  if (!data) return ""; // Retorna vazio se a data for nula ou indefinida
+  if (!data) return "";
   try {
-    // Cria um objeto Date e formata para o padrão local (ex: "dd/mm/yyyy")
     return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   } catch (e) {
-    // Se a data for inválida, retorna a própria data (ou vazio)
     return data;
   }
 };
-
-// Função para formatar a data para o formato do input (YYYY-MM-DD)
 const formatarDataParaInput = (data) => {
     if (!data) return "";
     try {
         const d = new Date(data);
-        // Adiciona 1 ao mês porque getMonth() é base 0 (0-11)
         const mes = (d.getUTCMonth() + 1).toString().padStart(2, '0');
         const dia = d.getUTCDate().toString().padStart(2, '0');
         const ano = d.getUTCFullYear();
@@ -40,7 +35,6 @@ const formatarDataParaInput = (data) => {
         return "";
     }
 };
-
 
 export default function Paciente() {
   const API_URL = "http://localhost:3000/pacientes"; 
@@ -54,6 +48,8 @@ export default function Paciente() {
   const [busca, setBusca] = useState("");
   const [editandoId, setEditandoId] = useState(null);
   const [carregando, setCarregando] = useState(false);
+  
+  // CORREÇÃO: Agora o hook useNavigation está definido e pode ser usado
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -74,7 +70,6 @@ export default function Paciente() {
   };
 
   const salvarPaciente = async () => {
-    // ... (código sem alterações)
     try {
       if (!paciente.nome.trim() || !paciente.telefone.trim() || !paciente.email.trim()) {
         Alert.alert("Atenção", "Preencha os campos obrigatórios: Nome, Telefone e Email.");
@@ -100,7 +95,6 @@ export default function Paciente() {
       nome: item.nome || "",
       telefone: item.telefone || "",
       email: item.email || "",
-      // CORREÇÃO: Usa a função para formatar a data para o input
       dataNascimento: formatarDataParaInput(item.dataNascimento),
       sexo: item.sexo || "",
       nomeMae: item.nomeMae || "",
@@ -110,7 +104,6 @@ export default function Paciente() {
   };
 
   const excluirPaciente = async (id) => {
-    // ... (código sem alterações)
     Alert.alert(
       "Excluir paciente", "Tem certeza que deseja excluir este paciente?",
       [
@@ -133,7 +126,6 @@ export default function Paciente() {
   };
 
   const limparCampos = () => {
-    // ... (código sem alterações)
     setPaciente({
       nome: "", telefone: "", email: "", dataNascimento: "",
       sexo: "", nomeMae: "", periodo: "",
@@ -146,23 +138,20 @@ export default function Paciente() {
   );
 
   // 🔹 Navegar para adicionar exame
-  const irParaAdicionarExame = (idPaciente) => {
-    if (idPaciente) {
-      navigation.navigate('AdicionarExames', { idPaciente });
+  const irParaAdicionarExame = (pacienteId) => {
+    // CORREÇÃO: Nome do parâmetro corrigido para 'pacienteId' para consistência
+    if (pacienteId) {
+      navigation.navigate('AdicionarExames', { pacienteId: pacienteId });
     }
   };
 
   return (
-    // A tag <ScrollView> foi removida pois a FlatList já implementa rolagem.
-    // Envolver uma FlatList em uma ScrollView pode causar problemas de performance.
     <View style={estilo.container}>
-      {/* 📄 Lista (movida para cima para melhor estrutura com FlatList) */}
       <FlatList
         data={filtrados}
         keyExtractor={(item) => item.idPaciente.toString()}
-        ListHeaderComponent={ // O formulário agora é o cabeçalho da lista
+        ListHeaderComponent={
           <>
-            {/* 📋 Formulário */}
             <View style={estilo.prancheta}>
               <View style={estilo.header}>
                 <MaterialIcons name="assignment" size={60} color="#FFD700" />
@@ -170,7 +159,6 @@ export default function Paciente() {
                   {editandoId ? "Editar Paciente" : "Cadastro de Paciente"}
                 </Text>
               </View>
-
               {[
                 { placeholder: "Nome completo", key: "nome" },
                 { placeholder: "Telefone", key: "telefone" },
@@ -186,13 +174,10 @@ export default function Paciente() {
                   onChangeText={(v) => setPaciente({ ...paciente, [campo.key]: v })}
                 />
               ))}
-
               <TouchableOpacity style={estilo.botao} onPress={salvarPaciente}>
                 <Text style={estilo.textoBotao}>{editandoId ? "Atualizar" : "Salvar"}</Text>
               </TouchableOpacity>
             </View>
-
-            {/* 🔍 Busca */}
             <View style={estilo.searchBox}>
               <MaterialIcons name="search" size={24} color="#003366" />
               <TextInput
@@ -214,13 +199,16 @@ export default function Paciente() {
               <Text style={estilo.nome}>{item.nome}</Text>
               <Text>{item.telefone}</Text>
               <Text>{item.email}</Text>
-              {/* CORREÇÃO: Usa a função para formatar a data com segurança */}
               <Text>{formatarData(item.dataNascimento)}</Text>
               <Text>{item.sexo}</Text>
               <Text>{item.nomeMae}</Text>
               <Text>{item.periodo}</Text>
             </View>
             <View style={estilo.icons}>
+              {/* CORREÇÃO: Adicionado botão para adicionar exame */}
+              <TouchableOpacity onPress={() => irParaAdicionarExame(item.idPaciente)}>
+                <MaterialIcons name="note-add" size={28} color="#28a745" />
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => editarPaciente(item)}>
                 <MaterialIcons name="edit" size={28} color="#007bff" />
               </TouchableOpacity>
@@ -249,5 +237,5 @@ const estilo = StyleSheet.create({
   searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
   card: { backgroundColor: "#fff", borderWidth: 1.5, borderColor: "#007bff22", borderRadius: 10, padding: 14, marginBottom: 12, flexDirection: "row", justifyContent: "space-between" },
   nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
-  icons: { flexDirection: "row", gap: 15, alignItems: "center" },
+  icons: { flexDirection: "row", gap: 18, alignItems: "center" }, // Aumentei o 'gap' para dar mais espaço
 });
