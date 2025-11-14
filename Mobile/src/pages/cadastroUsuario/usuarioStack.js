@@ -1,16 +1,25 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import ListaUsuarios from './listaUsuario';
-import CadastroUsuario from './cadastroUsuario';
+import ListagemUsuario from "./ListagemUsuario";
+import CadastroUsuario from "./CadastroUsuario";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
-export default function UsuariosStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
-      <Stack.Screen name="ListaUsuarios" component={ListaUsuarios} options={{ title: "Usuários" }} />
-      <Stack.Screen name="CadastroUsuario" component={CadastroUsuario} options={{ title: "Cadastrar Usuário" }} />
-    </Stack.Navigator>
-  );
+export default function UsuarioStack() {
+
+    return (
+        <Stack.Navigator initialRouteName="Listagem">
+            <Stack.Screen
+                name="Listagem"
+                component={ListagemUsuario}
+                options={{ title: "Lista de Usuários" }}
+            />
+            <Stack.Screen
+                name="Cadastro"
+                component={CadastroUsuario}
+                options={{ title: "Cadastro de Usuário" }}
+            />
+        </Stack.Navigator>
+    );
 }

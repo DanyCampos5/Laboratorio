@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
-const pessoasRoutes = require("./Controller/PessoasController/pessoa");
+const usuarioRoutes = require("./Controller/UsuarioController/Usuario");
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.use('/exames', examesRoutes);
 app.use('/pacientes', pacientesRoutes);
-app.use('/pessoas', pessoasRoutes);
+app.use('/usuario', usuarioRoutes);
 
-const PORT = 3000;
+const PORT = 3000;  
 app.listen(PORT, () => console.log(`Servidor ouvindo a porta: ${PORT}`));
