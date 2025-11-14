@@ -19,6 +19,8 @@ router.get("/getpacientes", async (req, res) => {
     }
 })
 
+
+
 //rota para inserir um exame
 router.post("/insertexame", async (req, res) => {
     try {
