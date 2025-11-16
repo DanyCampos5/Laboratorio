@@ -1,123 +1,155 @@
-import React, { useLayoutEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ImageBackground } from "react-native";
+import { useState } from "react";
+import axios from "axios";
+import { Feather } from "@expo/vector-icons";
 
-export default function HomeScreen() {
-  const navigation = useNavigation();
+export default function Login({ navigation }) {
+  const [login, setLogin] = useState("");
+  const [senha, setSenha] = useState("");
 
-  // Função que executa o logout
-  const handleLogout = async () => {
-    // 1. Limpa o token do armazenamento
-    await AsyncStorage.removeItem('userToken');
-    
-    // 2. Redireciona para a tela de Login, limpando o histórico de navegação
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
-  };
+  const api = axios.create({
+    baseURL: "http://10.136.33.5:3000/"
+  });
 
-  // Adiciona o botão de Logout no cabeçalho da tela
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity 
-          onPress={() => {
-            Alert.alert(
-              "Confirmar Logout",
-              "Você tem certeza que deseja sair?",
-              [
-                { text: "Cancelar", style: "cancel" },
-                { text: "Sair", onPress: handleLogout, style: "destructive" }
-              ]
-            );
-          }} 
-          style={{ marginRight: 15 }}
-        >
-          <MaterialIcons name="logout" size={26} color="#fff" />
-        </TouchableOpacity>
-      ),
-      // Impede o usuário de usar o gesto de "voltar" para a tela de login
-      headerLeft: () => null, 
-    });
-  }, [navigation]);
+  async function handleLogin() {
+    try {
+      if (!login || !senha) {
+        console.error("Login e/ou senha não informados");
+        return;
+      }
+
+      const res = await api.post("/login", {
+        username: login,
+        password: senha,
+      });
+
+      if (res.status === 200 && res.data.token) {
+        navigation.navigate("Home", { token: res.data.token });
+      } else {
+        console.error("Credenciais inválidas");
+      }
+    } catch (err) {
+      console.error("Erro no login:", err);
+    }
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Painel Principal</Text>
-        <Text style={styles.subtitle}>Selecione uma opção para começar</Text>
-      </View>
+    <ImageBackground 
+      source={require("../../assets/img/bg-login.jpg")}
+      style={styles.bg}
+      imageStyle={{ opacity: 0.25 }}
+    >
+      <View style={styles.container}>
+        
+        <Text style={styles.title}>Bem-vindo</Text>
+        <Text style={styles.subtitle}>Faça login para continuar</Text>
 
-      <View style={styles.menuContainer}>
-        <TouchableOpacity 
-          style={styles.menuButton} 
-          onPress={() => navigation.navigate('Pacientes')}
-        >
-          <MaterialIcons name="people" size={30} color="#fff" />
-          <Text style={styles.menuButtonText}>Gerenciar Pacientes</Text>
+        <View style={styles.inputContainer}>
+          <Feather name="user" size={20} color="#fff" />
+          <TextInput
+            style={styles.input}
+            placeholder="Usuário"
+            placeholderTextColor="#CDE7F5"
+            value={login}
+            onChangeText={setLogin}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Feather name="lock" size={20} color="#fff" />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            placeholderTextColor="#CDE7F5"
+            secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.btn} onPress={handleLogin}>
+          <Text style={styles.btnText}>Entrar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.menuButton} 
-          onPress={() => alert('Tela de Exames ainda não implementada!')}
-        >
-          <MaterialIcons name="science" size={30} color="#fff" />
-          <Text style={styles.menuButtonText}>Lançar Exames</Text>
+        <TouchableOpacity>
+          <Text style={styles.forgot}>Esqueci minha senha</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </ImageBackground>
   );
 }
 
-// Estilos (sem alteração)
 const styles = StyleSheet.create({
-  container: {
+  bg: {
     flex: 1,
-    backgroundColor: '#f0f4f8',
+    justifyContent: "center",
+    alignItems: "center"
   },
-  header: {
-    backgroundColor: '#003366',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+
+  container: {
+    width: "85%",
+    padding: 25,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
   },
+
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
+    fontSize: 32,
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 5
   },
+
   subtitle: {
-    fontSize: 16,
-    color: '#d0e0ff',
-    textAlign: 'center',
-    marginTop: 5,
+    fontSize: 14,
+    color: "#DFF3FF",
+    textAlign: "center",
+    marginBottom: 25
   },
-  menuContainer: {
-    padding: 20,
-    marginTop: 20,
-  },
-  menuButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007bff',
-    padding: 20,
+
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
+    paddingHorizontal: 12,
+    height: 50,
+    marginBottom: 15
   },
-  menuButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 15,
+
+  input: {
+    flex: 1,
+    marginLeft: 10,
+    color: "#fff",
+    fontSize: 16,
   },
+
+  btn: {
+    backgroundColor: "#00AEEF",
+    paddingVertical: 14,
+    borderRadius: 30,
+    marginTop: 10,
+    shadowColor: "#00AEEF",
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+
+  btnText: {
+    textAlign: "center",
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18
+  },
+
+  forgot: {
+    textAlign: "center",
+    marginTop: 12,
+    color: "#CDE7F5",
+    fontSize: 14
+  }
 });

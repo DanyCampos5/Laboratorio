@@ -4,7 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import Paciente from './src/pages/cadastroPaciente';
 import ExamesStack from './src/pages/exames/ExamesStack';
-import Home from './src/pages/home';
+import Home from './src/pages/Home';
 import TipagemSanguinea from './src/pages/LabImuno';
 import LaudoStack from './src/pages/Laudo/LaudoStack';
 
@@ -15,9 +15,9 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator
         screenOptions={{
-          headerShown: true, // mostra o cabeçalho com o botão de menu
-          drawerType: 'front', // pode trocar pra 'slide' ou 'permanent'
-          drawerActiveTintColor: '#007BFF', // cor do item ativo
+          headerShown: true, 
+          drawerType: 'front', 
+          drawerActiveTintColor: '#007BFF', 
           drawerLabelStyle: {
             fontSize: 16,
             fontWeight: '500',
