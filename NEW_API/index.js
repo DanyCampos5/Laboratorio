@@ -7,6 +7,8 @@ const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
 const laudoRoutes = require("./Controller/LaudoController/laudo");
 
+const auth = require("./Controller/auth");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -32,9 +34,6 @@ app.get('/', (req, res) => {
 
 app.post("/login", (req, res) => {
     const {username, password} = req.body || {};
-    
-    console.log(`Tentativa de login - Usuário: ${username}, Senha: ${password}`);
-    
     const user = USERS.find(u => u.username === username && u.password === password);
     
     if(!user) {
@@ -42,14 +41,13 @@ app.post("/login", (req, res) => {
     }
     
     const token = signToken(user);
-    console.log(`Login bem-sucedido para o usuário: ${username}. Token gerado.`);
-    res.status(200).json({ token });    
+    res.status(200).json({ token });
 });
 
-app.use('/usuarios', usuarioRoutes);
-app.use('/exames', examesRoutes);
-app.use('/pacientes', pacientesRoutes);
-app.use('/laudo', laudoRoutes);
+app.use('/usuarios', auth, usuarioRoutes);
+app.use('/exames', auth, examesRoutes);
+app.use('/pacientes', auth, pacientesRoutes);
+app.use('/laudo', auth, laudoRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

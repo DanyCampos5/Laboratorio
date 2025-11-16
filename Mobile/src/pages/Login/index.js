@@ -1,11 +1,14 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ImageBackground } from "react-native";
-import { useState } from "react";
+import { StyleSheet, View, Text, TextInput, TouchableOpacity } from "react-native";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { Feather } from "@expo/vector-icons";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Login({ navigation }) {
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
+
+  const { setToken } = useContext(AuthContext);
 
   const api = axios.create({
     baseURL: "http://10.136.33.5:3000/"
@@ -13,10 +16,7 @@ export default function Login({ navigation }) {
 
   async function handleLogin() {
     try {
-      if (!login || !senha) {
-        console.error("Login e/ou senha não informados");
-        return;
-      }
+      if (!login || !senha) return;
 
       const res = await api.post("/login", {
         username: login,
@@ -24,81 +24,68 @@ export default function Login({ navigation }) {
       });
 
       if (res.status === 200 && res.data.token) {
-        navigation.navigate("Home", { token: res.data.token });
-      } else {
-        console.error("Credenciais inválidas");
+        setToken(res.data.token);
+        navigation.replace("MenuApp");
       }
+
     } catch (err) {
       console.error("Erro no login:", err);
     }
   }
 
   return (
-    <ImageBackground 
-      source={require("../../assets/img/bg-login.jpg")}
-      style={styles.bg}
-      imageStyle={{ opacity: 0.25 }}
-    >
-      <View style={styles.container}>
-        
-        <Text style={styles.title}>Bem-vindo</Text>
-        <Text style={styles.subtitle}>Faça login para continuar</Text>
+    <View style={styles.container}>
+      
+      <Text style={styles.title}>Bem-vindo</Text>
+      <Text style={styles.subtitle}>Faça login para continuar</Text>
 
-        <View style={styles.inputContainer}>
-          <Feather name="user" size={20} color="#fff" />
-          <TextInput
-            style={styles.input}
-            placeholder="Usuário"
-            placeholderTextColor="#CDE7F5"
-            value={login}
-            onChangeText={setLogin}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Feather name="lock" size={20} color="#fff" />
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            placeholderTextColor="#CDE7F5"
-            secureTextEntry
-            value={senha}
-            onChangeText={setSenha}
-          />
-        </View>
-
-        <TouchableOpacity style={styles.btn} onPress={handleLogin}>
-          <Text style={styles.btnText}>Entrar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <Text style={styles.forgot}>Esqueci minha senha</Text>
-        </TouchableOpacity>
+      <View style={styles.inputContainer}>
+        <Feather name="user" size={20} color="#555" />
+        <TextInput
+          style={styles.input}
+          placeholder="Usuário"
+          placeholderTextColor="#777"
+          value={login}
+          onChangeText={setLogin}
+        />
       </View>
-    </ImageBackground>
+
+      <View style={styles.inputContainer}>
+        <Feather name="lock" size={20} color="#555" />
+        <TextInput
+          style={styles.input}
+          placeholder="Senha"
+          placeholderTextColor="#777"
+          secureTextEntry
+          value={senha}
+          onChangeText={setSenha}
+        />
+      </View>
+
+      <TouchableOpacity style={styles.btn} onPress={handleLogin}>
+        <Text style={styles.btnText}>Entrar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity>
+        <Text style={styles.forgot}>Esqueci minha senha</Text>
+      </TouchableOpacity>
+
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bg: {
+  container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
-  },
-
-  container: {
-    width: "85%",
-    padding: 25,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    alignItems: "center",
+    paddingHorizontal: 25,
+    backgroundColor: "#F2F9FF"
   },
 
   title: {
-    fontSize: 32,
-    color: "#fff",
+    fontSize: 30,
+    color: "#007EB3",
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5
@@ -106,7 +93,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 14,
-    color: "#DFF3FF",
+    color: "#4A7385",
     textAlign: "center",
     marginBottom: 25
   },
@@ -114,29 +101,29 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "#fff",
+    borderColor: "#A9D7EC",
+    borderWidth: 1.5,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 50,
-    marginBottom: 15
+    marginBottom: 15,
+    width: "100%"
   },
 
   input: {
     flex: 1,
     marginLeft: 10,
-    color: "#fff",
+    color: "#333",
     fontSize: 16,
   },
 
   btn: {
-    backgroundColor: "#00AEEF",
+    backgroundColor: "#009FD6",
     paddingVertical: 14,
     borderRadius: 30,
     marginTop: 10,
-    shadowColor: "#00AEEF",
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 5,
+    width: "100%"
   },
 
   btnText: {
@@ -149,7 +136,7 @@ const styles = StyleSheet.create({
   forgot: {
     textAlign: "center",
     marginTop: 12,
-    color: "#CDE7F5",
+    color: "#007EB3",
     fontSize: 14
   }
 });

@@ -1,20 +1,33 @@
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 
-import Login from '../pages/Login';
-import Home from '../pages/Home';
+import { AuthProvider } from "../context/AuthContext";
 
-const Stack = createNativeStackNavigator();
+import Login from "../pages/Login/Login";
+import Home from "../pages/Home/Home";
+import cadastroPaciente from "../pages/cadastroPaciente/index.js";
+import Laudo from "../pages/Laudo/Laudo";
+import exames from "../pages/exames/Exames";
+import Lablmuno from "../pages/Lablmuno/Lablmuno";
+import AdicionarExames from "../pages/adicionarExames/AdicionarExames";
 
-export default function Routes(){
-    return(
-        <NavigationContainer>
-            <Stack.Navigator
-                screenOptions={{headerShown: false}}
-            >
-                <Stack.Screen name="Login" component={Login} />
-                <Stack.Screen name="Home" component={Home} />
-            </Stack.Navigator>
-        </NavigationContainer> 
-    )
+const Stack = createStackNavigator();
+
+export default function Routes() {
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Laudo" component={Laudo} />
+          <Stack.Screen name="LabImuno" component={Lablmuno} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="exames" component={exames} />
+          <Stack.Screen name="cadastroPaciente" component={cadastroPaciente} />
+          <Stack.Screen name="AdicionarExames" component={AdicionarExames} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthProvider>
+  );
 }
