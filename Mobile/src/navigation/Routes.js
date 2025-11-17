@@ -4,13 +4,13 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import { AuthProvider } from "../context/AuthContext";
 
-import Login from "../pages/Login/Login";
-import Home from "../pages/Home/Home";
+import Login from "../pages/Login/index.js";
+import Home from "../pages/home/index.js";
 import cadastroPaciente from "../pages/cadastroPaciente/index.js";
-import Laudo from "../pages/Laudo/Laudo";
-import exames from "../pages/exames/Exames";
-import Lablmuno from "../pages/Lablmuno/Lablmuno";
-import AdicionarExames from "../pages/adicionarExames/AdicionarExames";
+import Laudo from "../pages/Laudo/BuscarLaudo.js";
+import exames from "../pages/exames/index.js";
+import Lablmuno from "../pages/LabImuno/index.js";
+import AdicionarExames from "../pages/adicionarExames/index.js";
 
 const Stack = createStackNavigator();
 

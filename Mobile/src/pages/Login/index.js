@@ -11,7 +11,7 @@ export default function Login({ navigation }) {
   const { setToken } = useContext(AuthContext);
 
   const api = axios.create({
-    baseURL: "http://10.136.33.5:3000/"
+    baseURL: "http://localhost:3000"
   });
 
   async function handleLogin() {

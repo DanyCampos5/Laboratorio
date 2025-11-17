@@ -4,7 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Login from './src/pages/Login';
-import Home from './src/pages/Home';
+import Home from './src/pages/home';
 import Paciente from './src/pages/cadastroPaciente';
 import ExamesStack from './src/pages/exames/ExamesStack';
 import LaudoStack from './src/pages/Laudo/LaudoStack';
