@@ -1,75 +1,92 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from "react-native";
-import { useState, useContext } from "react";
-import axios from "axios";
-import { Feather } from "@expo/vector-icons";
-import { AuthContext } from "../../context/AuthContext";
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native'; // Para navegação
 
-export default function Login({ navigation }) {
-  const [login, setLogin] = useState("");
-  const [senha, setSenha] = useState("");
+// ⚠️ Mude para o IP REAL do seu computador ou domínio da API
+const API_URL = 'http://localhost:3000/log/login'; 
 
-  const { setToken } = useContext(AuthContext);
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
-  const api = axios.create({
-    baseURL: "http://localhost:3000"
-  });
+  // Função Principal de Login
+  const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
+    }
 
-  async function handleLogin() {
+    setLoading(true);
+
     try {
-      if (!login || !senha) return;
-
-      const res = await api.post("/login", {
-        username: login,
-        password: senha,
+      // 1. Fazer a Requisição para a API
+      const response = await axios.post(API_URL, {
+        email: email,
+        senha: senha,
       });
 
-      if (res.status === 200 && res.data.token) {
-        setToken(res.data.token);
-        navigation.replace("MenuApp");
-      }
+      // 2. Processar a Resposta de Sucesso (Status 200)
+      const { token, message } = response.data;
+      
+      // 3. Armazenar o Token JWT
+      await AsyncStorage.setItem('userToken', token);
+      
+      // 4. Navegar para a Tela Principal
+      // Substitua 'Home' pelo nome da sua tela principal
+      navigation.replace('Home'); 
+      
+      Alert.alert('Sucesso!', message);
 
-    } catch (err) {
-      console.error("Erro no login:", err);
+    } catch (error) {
+      let errorMessage = 'Ocorreu um erro desconhecido.';
+      
+      // Tratar erros HTTP (ex: 401 Credenciais inválidas)
+      if (error.response) {
+        // Se a API retornou um JSON com a mensagem de erro
+        errorMessage = error.response.data.message || 'Erro de servidor.';
+      } else if (error.request) {
+        // Se a requisição foi feita, mas não houve resposta (ex: API offline)
+        errorMessage = 'Não foi possível conectar ao servidor.';
+      }
+      
+      Alert.alert('Falha no Login', errorMessage);
+      console.error('Erro de Login:', error);
+
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
-      
-      <Text style={styles.title}>Bem-vindo</Text>
-      <Text style={styles.subtitle}>Faça login para continuar</Text>
+      <Text style={styles.title}>Acesso ao Sistema</Text>
 
-      <View style={styles.inputContainer}>
-        <Feather name="user" size={20} color="#555" />
-        <TextInput
-          style={styles.input}
-          placeholder="Usuário"
-          placeholderTextColor="#777"
-          value={login}
-          onChangeText={setLogin}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
 
-      <View style={styles.inputContainer}>
-        <Feather name="lock" size={20} color="#555" />
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          placeholderTextColor="#777"
-          secureTextEntry
-          value={senha}
-          onChangeText={setSenha}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Senha"
+        value={senha}
+        onChangeText={setSenha}
+        secureTextEntry
+      />
 
-      <TouchableOpacity style={styles.btn} onPress={handleLogin}>
-        <Text style={styles.btnText}>Entrar</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity>
-        <Text style={styles.forgot}>Esqueci minha senha</Text>
-      </TouchableOpacity>
-
+      <Button
+        title={loading ? "Carregando..." : "Entrar"}
+        onPress={handleLogin}
+        disabled={loading}
+      />
     </View>
   );
 }
@@ -77,66 +94,22 @@ export default function Login({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 25,
-    backgroundColor: "#F2F9FF"
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
   },
-
   title: {
-    fontSize: 30,
-    color: "#007EB3",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 5
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    textAlign: 'center',
   },
-
-  subtitle: {
-    fontSize: 14,
-    color: "#4A7385",
-    textAlign: "center",
-    marginBottom: 25
-  },
-
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderColor: "#A9D7EC",
-    borderWidth: 1.5,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 50,
-    marginBottom: 15,
-    width: "100%"
-  },
-
   input: {
-    flex: 1,
-    marginLeft: 10,
-    color: "#333",
-    fontSize: 16,
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
   },
-
-  btn: {
-    backgroundColor: "#009FD6",
-    paddingVertical: 14,
-    borderRadius: 30,
-    marginTop: 10,
-    width: "100%"
-  },
-
-  btnText: {
-    textAlign: "center",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 18
-  },
-
-  forgot: {
-    textAlign: "center",
-    marginTop: 12,
-    color: "#007EB3",
-    fontSize: 14
-  }
 });
