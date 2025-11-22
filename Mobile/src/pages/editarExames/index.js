@@ -46,37 +46,28 @@ export default function EditarExames({ route }) {
     };
 
     const handleDelete = async (idExame) => {
-        if (!idExame) {
-            Alert.alert("Erro de Aplicação", "Não foi possível identificar o exame para exclusão.");
+        // Para garantir compatibilidade com a web, usamos window.confirm
+        // que retorna true (se OK) ou false (se Cancelar).
+        const confirmDelete = window.confirm("Tem certeza que deseja deletar este exame?");
+
+        if (!confirmDelete) {
+            // Se o usuário clicou em "Cancelar", a função para aqui.
             return;
         }
 
-        Alert.alert(
-            "Confirmar Exclusão",
-            "Tem certeza que deseja deletar este exame?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Deletar",
-                    onPress: async () => {
-                        try {
-                            // 3. Usar 'api.delete' para excluir com autenticação
-                            const response = await api.delete(`/exames/deletarexame/${idExame}`);
-                            if (response.status === 200) {
-                                Alert.alert('Sucesso', 'Exame deletado com sucesso!');
-                                fetchExames(); // Recarrega a lista
-                            } else {
-                                Alert.alert('Erro', response.data.message || 'Não foi possível deletar o exame.');
-                            }
-                        } catch (error) {
-                            console.error('Erro ao deletar:', error);
-                            Alert.alert('Erro de Conexão', 'Não foi possível conectar à API.');
-                        }
-                    },
-                    style: "destructive"
-                }
-            ]
-        );
+        // Se o usuário confirmou, a requisição para a API é feita.
+        try {
+            const response = await api.delete(`/exames/deletarexame/${idExame}`);
+            if (response.status === 200) {
+                Alert.alert('Sucesso', 'Exame deletado com sucesso!');
+                fetchExames(); // Recarrega a lista de exames
+            } else {
+                Alert.alert('Erro', response.data.message || 'Não foi possível deletar o exame.');
+            }
+        } catch (error) {
+            console.error('Erro ao deletar:', error);
+            Alert.alert('Erro de Conexão', 'Não foi possível conectar à API.');
+        }
     };
 
     const handleSave = async (exame) => {
