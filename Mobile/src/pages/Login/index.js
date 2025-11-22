@@ -36,8 +36,8 @@ export default function LoginScreen() {
       await AsyncStorage.setItem('userToken', token);
       
       // 4. Navegar para a Tela Principal
-      // Substitua 'Home' pelo nome da sua tela principal
-      navigation.replace('Home'); 
+      // Navega para o container do Drawer Navigator
+      navigation.replace('MainApp'); 
       
       Alert.alert('Sucesso!', message);
 
