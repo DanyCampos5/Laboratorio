@@ -3,8 +3,8 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
   TextInput, FlatList, ActivityIndicator,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import api from "../../services/api"; // Usar o serviço de API configurado
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 
@@ -31,7 +31,7 @@ const formatarDataParaInput = (data) => {
 };
 
 export default function Paciente() {
-  const API_URL = "http://192.168.0.105:3000/pacientes";
+  const API_URL = "/pacientes"; // A URL base está no api.js
   const [paciente, setPaciente] = useState({
     nome: "",
     telefone: "",
@@ -51,16 +51,12 @@ export default function Paciente() {
     buscarPacientes();
   }, []);
 
-  const getAuth = async () => {
-    const token = await AsyncStorage.getItem("@token");
-    return { headers: { Authorization: `Bearer ${token}` } };
-  };
+  // A autenticação agora é tratada pelo interceptor do api.js
 
   const buscarPacientes = async () => {
     try {
       setCarregando(true);
-      const config = await getAuth();
-      const { data } = await axios.get(`${API_URL}/getpacientes`, config);
+      const { data } = await api.get(`${API_URL}/getpacientes`);
       setPacientes(Array.isArray(data) ? data : []);
     } catch (error) {
       setPacientes([]);
@@ -74,11 +70,10 @@ export default function Paciente() {
       if (!paciente.nome.trim() || !paciente.telefone.trim() || !paciente.email.trim()) {
         return;
       }
-      const config = await getAuth();
       if (editandoId) {
-        await axios.put(`${API_URL}/${editandoId}`, paciente, config);
+        await api.put(`${API_URL}/${editandoId}`, paciente);
       } else {
-        await axios.post(API_URL, paciente, config);
+        await api.post(API_URL, paciente);
       }
       limparCampos();
       buscarPacientes();
@@ -100,8 +95,7 @@ export default function Paciente() {
 
   const excluirPaciente = async (id) => {
     try {
-      const config = await getAuth();
-      await axios.delete(`${API_URL}/${id}`, config);
+      await api.delete(`${API_URL}/${id}`);
       buscarPacientes();
     } catch (error) {}
   };
@@ -136,13 +130,25 @@ export default function Paciente() {
         keyExtractor={(item) => item.idPaciente.toString()}
         ListHeaderComponent={
           <>
-            <View style={estilo.prancheta}>
-              <View style={estilo.header}>
-                <Text style={estilo.titulo}>
-                  {editandoId ? "Editar Paciente" : "Cadastro de Paciente"}
-                </Text>
-              </View>
-
+            <View style={estilo.searchContainer}>
+              <Ionicons name="search-outline" size={20} color="#007BFF" style={{ marginRight: 8 }} />
+              <TextInput
+                placeholder="Pesquisar paciente..."
+                style={estilo.search}
+                value={busca}
+                onChangeText={setBusca}
+                placeholderTextColor="#999"
+              />
+              {busca.length > 0 && (
+                <TouchableOpacity onPress={() => setBusca("")}>
+                  <Ionicons name="close-circle" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={estilo.cadastroContainer}>
+              <Text style={estilo.titulo}>
+                {editandoId ? "Editar Paciente" : "Cadastrar Novo Paciente"}
+              </Text>
               {[
                 { placeholder: "Nome completo", key: "nome" },
                 { placeholder: "Telefone", key: "telefone" },
@@ -160,25 +166,17 @@ export default function Paciente() {
                   onChangeText={(v) => setPaciente({ ...paciente, [campo.key]: v })}
                 />
               ))}
-
               <TouchableOpacity style={estilo.botao} onPress={salvarPaciente}>
                 <Text style={estilo.textoBotao}>
                   {editandoId ? "Atualizar" : "Salvar"}
                 </Text>
               </TouchableOpacity>
+              {editandoId && (
+                <TouchableOpacity style={[estilo.botao, { backgroundColor: '#dc3545', marginTop: 10 }]} onPress={limparCampos}>
+                  <Text style={estilo.textoBotao}>Cancelar Edição</Text>
+                </TouchableOpacity>
+              )}
             </View>
-
-            <View style={estilo.searchBox}>
-              <MaterialIcons name="search" size={24} color="#003366" />
-              <TextInput
-                style={estilo.searchInput}
-                placeholder="Pesquisar paciente"
-                value={busca}
-                onChangeText={setBusca}
-              />
-            </View>
-
-            <Text style={estilo.headerTitle}>Visualizar Pacientes</Text>
           </>
         }
         ListEmptyComponent={
@@ -187,26 +185,33 @@ export default function Paciente() {
           </Text>
         }
         renderItem={({ item }) => (
-          <View style={estilo.card}>
-            <View style={{ flex: 1 }}>
-              <Text style={estilo.nome}>{item.nome}</Text>
-              <Text>{item.telefone}</Text>
-              <Text>{item.email}</Text>
-              <Text>{formatarData(item.dataNascimento)}</Text>
-              <Text>{item.sexo}</Text>
-              <Text>{item.nomeMae}</Text>
-              <Text>{item.periodo}</Text>
+          <View style={estilo.listItem}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={estilo.nameText}>{item.nome}</Text>
+              <View style={estilo.iconButtons}>
+                <TouchableOpacity
+                  style={[estilo.iconButton, { backgroundColor: '#007BFF' }]}
+                  onPress={() => editarPaciente(item)}
+                >
+                  <Ionicons name="create-outline" size={18} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[estilo.iconButton, { backgroundColor: '#dc3545' }]}
+                  onPress={() => excluirPaciente(item.idPaciente)}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={estilo.icons}>
-              <TouchableOpacity onPress={() => editarPaciente(item)}>
-                <MaterialIcons name="edit" size={28} color="#007bff" />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => excluirPaciente(item.idPaciente)}>
-                <MaterialIcons name="delete" size={28} color="#ff4d4d" />
-              </TouchableOpacity>
-            </View>
+            <Text style={estilo.infoText}>
+              Nascimento: {formatarData(item.dataNascimento)}
+            </Text>
+            <Text style={estilo.infoText}>Telefone: {item.telefone}</Text>
+            <Text style={estilo.infoText}>Email: {item.email}</Text>
+            <Text style={estilo.infoText}>Mãe: {item.nomeMae}</Text>
+            <Text style={estilo.infoText}>Período: {item.periodo}</Text>
           </View>
         )}
         ListFooterComponent={
@@ -220,32 +225,56 @@ export default function Paciente() {
 }
 
 const estilo = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  prancheta: {
-    backgroundColor: "#f9f9ff",
-    borderWidth: 2,
-    borderColor: "#007bff33",
-    borderRadius: 14,
-    padding: 20,
-    marginBottom: 25,
+  container: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+    paddingTop: 0, // Removido StatusBar.currentHeight para consistência
   },
-  header: { alignItems: "center", marginBottom: 15 },
-  titulo: { fontSize: 20, fontWeight: "700", color: "#003366" },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#003366",
-    marginBottom: 10,
-    marginTop: 10,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#007BFF33',
+    paddingHorizontal: 12,
+    margin: 16,
+    height: 48,
+  },
+  search: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+  },
+  cadastroContainer: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#007bff33",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  titulo: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#007BFF",
+    marginBottom: 15,
+    textAlign: 'center',
   },
   input: {
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#007bff33",
+    backgroundColor: "#f0f0f0",
+    borderWidth: 1,
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     marginBottom: 10,
-    color: "#003366",
+    color: "#333",
   },
   botao: {
     backgroundColor: "#28a745",
@@ -253,28 +282,46 @@ const estilo = StyleSheet.create({
     borderRadius: 8,
     marginTop: 5,
   },
-  textoBotao: { textAlign: "center", color: "#fff", fontWeight: "700" },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#007bff33",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 10,
+  textoBotao: {
+    textAlign: "center",
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
   },
-  searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: "#003366" },
-  card: {
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#007bff22",
-    borderRadius: 10,
-    padding: 14,
+  listItem: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginHorizontal: 16,
     marginBottom: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#007BFF22',
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
-  nome: { fontWeight: "700", fontSize: 16, marginBottom: 4 },
-  icons: { flexDirection: "row", gap: 18, alignItems: "center" },
+  nameText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 6,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 2,
+  },
+  iconButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  iconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

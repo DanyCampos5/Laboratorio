@@ -4,8 +4,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native'; // Para navegação
 
-// ⚠️ Mude para o IP REAL do seu computador ou domínio da API
-const API_URL = 'http://localhost:3000/log/login'; 
+// URL da API para ambiente de desenvolvimento web
+const API_URL = 'http://localhost:3000/log/login';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');

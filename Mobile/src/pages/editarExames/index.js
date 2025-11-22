@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker'; 
+import api from '../../services/api'; // 1. Importar a instância do Axios
 
 export default function EditarExames({ route }) {
     const { pacienteId } = route.params;
@@ -27,16 +28,16 @@ export default function EditarExames({ route }) {
     );
 
     const fetchExames = async () => {
-        // ... (código sem alterações)
         try {
-            const response = await fetch(`http://localhost:3000/exames/getExames/${pacienteId}`);
-            const data = await response.json();
-            if (response.ok && Array.isArray(data)) {
-                setExames(data);
+            // 2. Usar 'api.get' para buscar os exames com autenticação
+            const response = await api.get(`/exames/getExames/${pacienteId}`);
+            if (response.status === 200 && Array.isArray(response.data)) {
+                setExames(response.data);
             } else {
                 setExames([]);
             }
         } catch (error) {
+            // Tratamento de erro para Axios
             console.error('Erro ao buscar exames:', error);
             Alert.alert('Erro', 'Não foi possível carregar os exames');
         } finally {
@@ -44,60 +45,54 @@ export default function EditarExames({ route }) {
         }
     };
 
-    // *** FUNÇÃO handleDelete COM LOGS DETALHADOS ***
     const handleDelete = async (idExame) => {
-        console.log(`[FRONT-END] Botão Excluir clicado para o idExame: ${idExame}`);
-
         if (!idExame) {
-            console.error("[FRONT-END] ERRO: idExame é nulo ou indefinido.");
             Alert.alert("Erro de Aplicação", "Não foi possível identificar o exame para exclusão.");
             return;
         }
 
-        const url = `http://localhost:3000/exames/deletarexame/${idExame}`;
-        console.log(`[FRONT-END] URL da API: ${url}`);
-
-        try {
-            const response = await fetch(url, {
-                method: 'DELETE',
-            });
-
-            console.log(`[FRONT-END] Resposta da API recebida. Status: ${response.status}`);
-
-            const responseText = await response.text();
-            let data;
-            if (responseText) {
-                data = JSON.parse(responseText);
-                console.log('[FRONT-END] Dados da resposta (JSON):', data);
-            } else {
-                console.log('[FRONT-END] A resposta da API está vazia.');
-                data = { message: "Resposta vazia do servidor." };
-            }
-
-            if (response.ok && !data.error) {
-                Alert.alert('Sucesso', 'Exame excluído com sucesso!');
-                fetchExames(); // Recarrega a lista de exames
-            } else {
-                console.error(`[FRONT-END] API retornou um erro: ${data.message}`);
-                Alert.alert('Erro na Exclusão', data.message || 'Não foi possível excluir o exame.');
-            }
-        } catch (error) {
-            console.error('[FRONT-END] Falha crítica na requisição de exclusão:', error);
-            Alert.alert('Erro de Conexão', 'Ocorreu um erro de rede ao tentar excluir o exame.');
-        }
+        Alert.alert(
+            "Confirmar Exclusão",
+            "Tem certeza que deseja deletar este exame?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Deletar",
+                    onPress: async () => {
+                        try {
+                            // 3. Usar 'api.delete' para excluir com autenticação
+                            const response = await api.delete(`/exames/deletarexame/${idExame}`);
+                            if (response.status === 200) {
+                                Alert.alert('Sucesso', 'Exame deletado com sucesso!');
+                                fetchExames(); // Recarrega a lista
+                            } else {
+                                Alert.alert('Erro', response.data.message || 'Não foi possível deletar o exame.');
+                            }
+                        } catch (error) {
+                            console.error('Erro ao deletar:', error);
+                            Alert.alert('Erro de Conexão', 'Não foi possível conectar à API.');
+                        }
+                    },
+                    style: "destructive"
+                }
+            ]
+        );
     };
 
-    // ... (resto do código de handleSave, updateExameField, etc., sem alterações)
     const handleSave = async (exame) => {
         try {
-            const response = await fetch(`http://localhost:3000/exames/editarExame/${exame.idExamesSolicitados}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dataExame: exame.dataExame, resultado: exame.resultado }),
+            // 4. Usar 'api.put' para salvar com autenticação
+            const response = await api.put(`/exames/editarExame/${exame.idExamesSolicitados}`, {
+                dataExame: exame.dataExame,
+                resultado: exame.resultado
             });
-            const data = await response.json();
-            if (data.error) { Alert.alert('Erro', data.message); }
-            else { Alert.alert('Sucesso', 'Exame atualizado com sucesso!'); fetchExames(); }
+            
+            if (response.status === 200) {
+                Alert.alert('Sucesso', 'Exame atualizado com sucesso!');
+                fetchExames();
+            } else {
+                Alert.alert('Erro', response.data.message || 'Não foi possível salvar as alterações');
+            }
         } catch (error) { console.error('Erro ao salvar:', error); Alert.alert('Erro', 'Não foi possível salvar as alterações'); }
     };
     const updateExameField = (id, field, value) => {

@@ -11,6 +11,7 @@ import {
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import api from '../../services/api'; // 1. Importar a instância configurada do Axios
 
 // Função para formatar a data para o formato YYYY-MM-DD
 const formatarDataParaAPI = (data) => {
@@ -61,13 +62,10 @@ export default function AdicionarExames({ route }) {
 
             console.log('Corpo enviado para API:', body);
 
-            const response = await fetch('http://localhost:3000/exames/insertexame', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body ),
-            });
+            // 2. Usar a instância 'api' que já anexa o token de autenticação
+            const response = await api.post('/exames/insertexame', body);
 
-            const data = await response.json();
+            const { data } = response;
 
             if (data.error) {
                 Alert.alert('Erro na API', data.message || 'Erro desconhecido');
@@ -76,8 +74,15 @@ export default function AdicionarExames({ route }) {
                 navigation.goBack();
             }
         } catch (error) {
+            // O Axios trata os erros de forma diferente do fetch
+            if (error.response) {
+                // Erro vindo da API (ex: 401, 400, 500)
+                Alert.alert('Erro ao Salvar', error.response.data.message || 'Ocorreu um erro no servidor.');
+            } else {
+                // Erro de rede ou outro problema
+                Alert.alert('Erro de Conexão', 'Não foi possível conectar à API.');
+            }
             console.error('ERRO CRÍTICO ao salvar:', error);
-            Alert.alert('Erro de Conexão', 'Não foi possível conectar à API.');
         } finally {
             setLoading(false);
         }

@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+// URL da API para ambiente de desenvolvimento web
 const API_URL = 'http://localhost:3000';
 
 export default function BuscarLaudo({ navigation }) {
