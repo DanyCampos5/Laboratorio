@@ -8,7 +8,9 @@ import {
     Text, 
     StatusBar 
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Necessário para o token
 import React, { useEffect, useState } from 'react';
+import api from '../../services/api'; // Importar a instância do Axios configurada
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -26,9 +28,8 @@ export default function Exames() {
     const getPessoas = async () => {
         try {
             setAtualizando(true);
-            const response = await fetch("http://localhost:3000/exames/getpacientes");
-            const json = await response.json();
-            setPessoas(json);
+            const response = await api.get("/exames/getpacientes");
+            setPessoas(response.data);
         } catch (error) {
             console.error("Erro ao requisitar a API  ", error);
         } finally {
