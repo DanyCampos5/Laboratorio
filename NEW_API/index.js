@@ -25,7 +25,7 @@ app.use('/log', loginRoutes);
 app.use('/usuarios', auth, usuarioRoutes);
 app.use('/exames', auth, examesRoutes);
 app.use('/pacientes', auth, pacientesRoutes);
-app.use('/laudo', auth, laudoRoutes);
+app.use('/laudo', laudoRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {
