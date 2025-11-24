@@ -87,6 +87,14 @@ export default function LoginScreen() {
         onPress={handleLogin}
         disabled={loading}
       />
+
+      <View style={styles.spacer} />
+
+      <Button
+        title="Cadastre-se"
+        onPress={() => navigation.navigate('CadastroUsuario')} // Assumindo que a rota se chama 'CadastroUsuario'
+        color="#007bff" // Cor diferente para destacar
+      />
     </View>
   );
 }
@@ -103,6 +111,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 30,
     textAlign: 'center',
+  },
+  spacer: {
+    height: 10, // Espaçamento entre os botões
   },
   input: {
     height: 50,

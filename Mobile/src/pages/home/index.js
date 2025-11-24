@@ -23,11 +23,11 @@ export default function Home() {
         <View style={styles.content}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Usuario")}
+            onPress={() => navigation.navigate("Paciente")}
             activeOpacity={0.8}
           >
             <MaterialIcons name="person" size={26} color="#007BFF" />
-            <Text style={styles.buttonText}>USUÁRIO</Text>
+            <Text style={styles.buttonText}>PACIENTE</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

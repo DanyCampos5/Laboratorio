@@ -6,6 +6,7 @@ import DrawerRoutes from "./DrawerRoutes";
 import { AuthProvider } from "../context/AuthContext";
 
 import Login from "../pages/Login/index.js";
+import CadastroUsuario from "../pages/cadastroUsuario/index.js";
 
 
 
@@ -21,6 +22,7 @@ export default function Routes() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="CadastroUsuario" component={CadastroUsuario} />
 
 
           <Stack.Screen name="MainApp" component={DrawerRoutes} />
