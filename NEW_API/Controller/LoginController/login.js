@@ -24,7 +24,7 @@ router.post("/login", async (req, res) => {
     try {
         // 2. Busca do Usuário no DB
         const [rows] = await pool.execute(
-            "SELECT idUsuario, username, password FROM usuario WHERE username = ?",
+            "SELECT id, nome, senha FROM usuario WHERE nome = ?",
             [email] 
         );
         
@@ -36,7 +36,7 @@ router.post("/login", async (req, res) => {
         }
 
         // 4. COMPARAÇÃO (Correto, mas inseguro)
-        const match = senha === user.password; 
+        const match = senha === user.senha; 
 
         if (!match) {
             return res.status(401).json({ error: true, message: "Credenciais inválidas." });
@@ -44,8 +44,8 @@ router.post("/login", async (req, res) => {
 
         // 5. Geração do Token JWT (AGORA DENTRO DO TRY, USANDO O 'let token' ACIMA)
         const payload = {
-            id: user.idUsuario, 
-            email: user.username 
+            id: user.id, 
+            email: user.nome 
         };
         
         token = jwt.sign(payload, JWT_SECRET, { // ⬅️ Atribuição
@@ -58,9 +58,9 @@ router.post("/login", async (req, res) => {
             message: "Login bem-sucedido!", 
             token: token,
             user: { 
-                id: user.idUsuario, // Usando a coluna correta
-                nome: user.username, // Usando a coluna correta
-                email: user.username // Usando a coluna correta
+                id: user.id, // Usando a coluna correta
+                nome: user.nome, // Usando a coluna correta
+                email: user.nome // Usando a coluna correta
             }
         });
 

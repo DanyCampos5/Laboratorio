@@ -1,39 +1,10 @@
 const express = require('express');
-const cors = require('cors');
 const router = express.Router();
-const app = express();
 const pool = require('../../db');
+const auth = require('../auth'); // Importa o middleware de autenticação
 
-
-// GET — listar todos os usuários
-router.get("/getUsuarios", async (req, res) => {
-    try {
-        const [rows] = await pool.execute("SELECT * FROM usuario;");
-        res.status(200).json(rows);
-    } catch (error) {
-        console.error("Erro ao listar usuários:", error);
-        res.status(500).json({ error: true, message: "Erro ao listar usuários." });
-    }
-});
-
-// GET — buscar usuário por ID
-router.get("/getUsuario/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const [rows] = await pool.execute("SELECT * FROM usuario WHERE id = ?", [id]);
-
-        if (rows.length === 0) {
-            return res.status(404).json({ error: true, message: "Usuário não encontrado." });
-        }
-
-        res.status(200).json({ error: false, usuario: rows[0] });
-    } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
-        res.status(500).json({ error: true, message: "Erro ao buscar usuário." });
-    }
-});
-
-// POST — inserir novo usuário
+// ROTA PÚBLICA: POST — inserir novo usuário
+// Esta rota vem ANTES da aplicação do middleware 'auth', portanto, é pública.
 router.post("/insertUsuario", async (req, res) => {
     console.log("Recebido no body:", req.body); //DEBUG
     try {
@@ -61,13 +32,7 @@ router.post("/insertUsuario", async (req, res) => {
             insertId: result.insertId
         });
     } catch (error) {
-        //DEBUG detalhado
         console.error("Erro ao inserir usuário:", error);
-        console.error("Stack trace:", error.stack);
-        console.error("Código do erro MYSQL", error.code);
-        console.error("SQL State:", error.sqlState);
-        console.error("SQL Message:", error.sqlMessage);
-
         res.status(500).json({
             error: true,
             message: "Erro ao inserir usuário."
@@ -75,7 +40,39 @@ router.post("/insertUsuario", async (req, res) => {
     }
 });
 
-// PUT — atualizar usuário existente
+// APLICAÇÃO DO MIDDLEWARE DE AUTENTICAÇÃO
+// Todas as rotas definidas ABAIXO desta linha serão protegidas e exigirão um token válido.
+router.use(auth);
+
+// ROTA PROTEGIDA: GET — listar todos os usuários
+router.get("/getUsuarios", async (req, res) => {
+    try {
+        const [rows] = await pool.execute("SELECT * FROM usuario;");
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Erro ao listar usuários:", error);
+        res.status(500).json({ error: true, message: "Erro ao listar usuários." });
+    }
+});
+
+// ROTA PROTEGIDA: GET — buscar usuário por ID
+router.get("/getUsuario/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.execute("SELECT * FROM usuario WHERE id = ?", [id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: true, message: "Usuário não encontrado." });
+        }
+
+        res.status(200).json({ error: false, usuario: rows[0] });
+    } catch (error) {
+        console.error("Erro ao buscar usuário:", error);
+        res.status(500).json({ error: true, message: "Erro ao buscar usuário." });
+    }
+});
+
+// ROTA PROTEGIDA: PUT — atualizar usuário existente
 router.put("/updateUsuario/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -115,7 +112,7 @@ router.put("/updateUsuario/:id", async (req, res) => {
     }
 });
 
-// DELETE — remover usuário
+// ROTA PROTEGIDA: DELETE — remover usuário
 router.delete("/deleteUsuario/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -136,5 +133,3 @@ router.delete("/deleteUsuario/:id", async (req, res) => {
 });
 
 module.exports = router;
-
-

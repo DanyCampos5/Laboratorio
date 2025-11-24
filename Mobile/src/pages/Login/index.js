@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native'; // Para navegação
+import CadastroUsuario from '../cadastroUsuario/index';
 
 // URL da API para ambiente de desenvolvimento web
 const API_URL = 'http://localhost:3000/log/login';

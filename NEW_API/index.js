@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
 
-const usuarioRoutes = require("./Controller/UsuarioController/usuario");
+const usuarioRoutes = require("./Controller/UsuarioController/usuario_corrigido");
 const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
 const laudoRoutes = require("./Controller/LaudoController/laudo");
@@ -21,11 +21,10 @@ app.get('/', (req, res) => {
 });
 
 app.use('/log', loginRoutes);
-
-app.use('/usuarios', auth, usuarioRoutes);
+app.use('/usuarios', usuarioRoutes);
 app.use('/exames', auth, examesRoutes);
 app.use('/pacientes', auth, pacientesRoutes);
-app.use('/laudo', laudoRoutes);
+app.use('/laudo', auth, laudoRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

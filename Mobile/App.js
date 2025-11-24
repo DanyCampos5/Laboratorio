@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,9 +12,11 @@ import ExamesStack from './src/pages/exames/ExamesStack';
 import LaudoStack from './src/pages/Laudo/LaudoStack';
 import TipagemSanguinea from './src/pages/LabImuno';
 
+// 1. IMPORTANTE: Importe a tela de Cadastro aqui
+import CadastroUsuario from './src/pages/cadastroUsuario'; 
+
 const RootStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
-const Stack = createStackNavigator();
 
 function MenuApp() {
   return (
@@ -49,7 +51,7 @@ export default function App() {
         }
       } catch (e) {
         console.error("Failed to fetch the token from storage", e);
-        setInitialRoute('Login'); // Em caso de erro, vai para o Login
+        setInitialRoute('Login');
       }
     };
 
@@ -67,18 +69,28 @@ export default function App() {
   return (
     <NavigationContainer>
       <RootStack.Navigator initialRouteName={initialRoute}>
-        {/* A tela de Login agora é a primeira a ser considerada */}
+        
+        {/* Tela de Login */}
         <RootStack.Screen 
           name="Login" 
           component={Login} 
           options={{ headerShown: false }} 
         />
-        {/* A tela principal com o menu */}
+
+        {/* 2. ADICIONE ISTO: A tela de Cadastro precisa estar no RootStack também */}
+        <RootStack.Screen 
+          name="CadastroUsuario" 
+          component={CadastroUsuario} 
+          options={{ title: 'Criar Conta' }} 
+        />
+
+        {/* O App Principal (Drawer) só é acessado após login */}
         <RootStack.Screen 
           name="MainApp" 
           component={MenuApp} 
           options={{ headerShown: false }} 
         />
+
       </RootStack.Navigator>
     </NavigationContainer>
   );
