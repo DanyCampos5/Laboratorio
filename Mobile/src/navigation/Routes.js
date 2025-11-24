@@ -6,6 +6,7 @@ import { AuthProvider } from "../context/AuthContext";
 
 import Login from "../pages/Login/index.js";
 import Home from "../pages/home/index.js";
+import CadastroUsuario from "../pages/cadastroUsuario/index.js";
 import cadastroPaciente from "../pages/cadastroPaciente/index.js";
 import Laudo from "../pages/Laudo/BuscarLaudo.js";
 import exames from "../pages/exames/index.js";
@@ -18,8 +19,9 @@ export default function Routes() {
   return (
     <AuthProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Usuario" component={CadastroUsuario} />
           <Stack.Screen name="Laudo" component={Laudo} />
           <Stack.Screen name="LabImuno" component={Lablmuno} />
           <Stack.Screen name="Home" component={Home} />

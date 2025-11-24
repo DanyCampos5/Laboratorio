@@ -1,140 +1,116 @@
+// Controller/UsuarioController/usuario.js
+
 const express = require('express');
-const cors = require('cors');
 const router = express.Router();
-const app = express();
-const pool = require('../../db');
+const pool = require('../../db'); // Ajuste o caminho conforme necessário
+const bcrypt = require('bcrypt'); // 🚨 Não se esqueça de instalar: npm install bcrypt
 
+const saltRounds = 10; // Nível de segurança do hash
 
-// GET — listar todos os usuários
-router.get("/getUsuarios", async (req, res) => {
+// Rotas de Usuário (já protegidas pelo middleware 'auth' no index.js)
+
+// 1. LISTAR TODOS OS USUÁRIOS (READ ALL)
+// Rota final será: GET /usuarios/getusuarios
+router.get("/getusuarios", async (req, res) => {
     try {
-        const [rows] = await pool.execute("SELECT * FROM usuario;");
+        // Seleciona todos os campos, EXCETO a SENHA (por segurança!)
+        const [rows] = await pool.execute('SELECT idUsuario, nome, telefone, email, cpf, registroP, cargoF FROM usuario;');
         res.status(200).json(rows);
     } catch (error) {
-        console.error("Erro ao listar usuários:", error);
-        res.status(500).json({ error: true, message: "Erro ao listar usuários." });
+        console.error("Erro ao buscar usuários:", error);
+        res.status(500).json({ error: true, message: "Erro ao buscar usuários." });
     }
 });
 
-// GET — buscar usuário por ID
-router.get("/getUsuario/:id", async (req, res) => {
+// 2. INSERIR NOVO USUÁRIO (CREATE)
+// Rota final será: POST /usuarios/insertusuario
+router.post("/insertusuario", async (req, res) => {
     try {
-        const { id } = req.params;
-        const [rows] = await pool.execute("SELECT * FROM usuario WHERE id = ?", [id]);
-
-        if (rows.length === 0) {
-            return res.status(404).json({ error: true, message: "Usuário não encontrado." });
+        const { nome, telefone, email, cpf, registroP, cargoF, senha } = req.body;
+        
+        if (!nome || !email || !senha) {
+            return res.status(400).json({ error: true, message: "Nome, Email e Senha são obrigatórios." });
         }
-
-        res.status(200).json({ error: false, usuario: rows[0] });
-    } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
-        res.status(500).json({ error: true, message: "Erro ao buscar usuário." });
-    }
-});
-
-// POST — inserir novo usuário
-router.post("/insertUsuario", async (req, res) => {
-    console.log("Recebido no body:", req.body); //DEBUG
-    try {
-        const { nome, email, telefone, cpf, registroP, cargoF, senha } = req.body;
-
-        if (!nome || !email || !telefone || !cpf || !registroP || !cargoF || !senha) {
-            console.warn("Dados incompletos para inserção de usuário:", req.body); //DEBUG
-            return res.status(400).json({
-                error: true,
-                message: "Todos os campos são obrigatórios!"
-            });
-        }
+        
+        // 🚨 CRUCIAL: Gerar o HASH da senha antes de salvar
+        const hashedPassword = await bcrypt.hash(senha, saltRounds);
 
         const [result] = await pool.execute(
-            `INSERT INTO usuario (nome, email, telefone, cpf, registroP, cargoF, senha)
+            `INSERT INTO usuario (nome, telefone, email, cpf, registroP, cargoF, senha)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [nome, email, telefone, cpf, registroP, cargoF, senha]
+            [nome, telefone, email, cpf, registroP, cargoF, hashedPassword] // Usa o HASH
         );
 
-        console.log("Usuario inserido com sucesso, ID:", result.insertId); //DEBUG
+        if (result.affectedRows > 0) {
+            return res.status(201).json({ error: false, message: "Usuário inserido com sucesso!" });
+        }
 
-        res.status(201).json({
-            error: false,
-            message: "Usuário inserido com sucesso!",
-            insertId: result.insertId
-        });
+        res.status(400).json({ error: true, message: "Falha ao inserir usuário." });
     } catch (error) {
-        //DEBUG detalhado
         console.error("Erro ao inserir usuário:", error);
-        console.error("Stack trace:", error.stack);
-        console.error("Código do erro MYSQL", error.code);
-        console.error("SQL State:", error.sqlState);
-        console.error("SQL Message:", error.sqlMessage);
-
-        res.status(500).json({
-            error: true,
-            message: "Erro ao inserir usuário."
-        });
+        res.status(500).json({ error: true, message: "Erro interno ao inserir." });
     }
 });
 
-// PUT — atualizar usuário existente
-router.put("/updateUsuario/:id", async (req, res) => {
+// 3. ATUALIZAR USUÁRIO (UPDATE)
+// Rota final será: PUT /usuarios/updateusuario/:id
+router.put("/updateusuario/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { nome, email, telefone, cpf, registroP, cargoF, senha } = req.body;
+        const { nome, telefone, email, cpf, registroP, cargoF, senha } = req.body;
 
-        if (!id || !nome || !email || !telefone || !cpf || !registroP || !cargoF || !senha) {
-            return res.status(400).json({
-                error: true,
-                message: "Informe todos os campos: id, nome, email, telefone, cpf, registroP, cargoF e senha."
-            });
+        if (!nome || !email) {
+            return res.status(400).json({ error: true, message: "Nome e Email são obrigatórios para a atualização." });
+        }
+        
+        // Lógica para UPDATE de campos opcionais
+        let sql = `UPDATE usuario SET nome = ?, telefone = ?, email = ?, cpf = ?, registroP = ?, cargoF = ?`;
+        let params = [nome, telefone, email, cpf, registroP, cargoF];
+
+        if (senha) {
+            // Se a senha foi enviada, HASH e atualize-a
+            const hashedPassword = await bcrypt.hash(senha, saltRounds);
+            sql += `, senha = ?`;
+            params.push(hashedPassword);
         }
 
-        const [result] = await pool.execute(
-            `UPDATE usuario 
-             SET nome = ?, email = ?, telefone = ?, cpf = ?, registroP = ?, cargoF = ?, senha = ?
-             WHERE id = ?`,
-            [nome, email, telefone, cpf, registroP, cargoF, senha, id]
-        );
+        sql += ` WHERE idUsuario = ?`;
+        params.push(id);
+
+
+        const [result] = await pool.execute(sql, params);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: true, message: "Usuário não encontrado." });
+            return res.status(404).json({ error: true, message: "Usuário não encontrado para atualizar." });
         }
 
-        const [rows] = await pool.execute("SELECT * FROM usuario WHERE id = ?", [id]);
-        res.status(200).json({
-            error: false,
-            message: "Usuário atualizado com sucesso!",
-            usuario: rows[0]
-        });
-
+        res.status(204).end(); // 204 No Content
     } catch (error) {
         console.error("Erro ao atualizar usuário:", error);
-        res.status(500).json({
-            error: true,
-            message: "Erro ao atualizar usuário."
-        });
+        res.status(500).json({ error: true, message: "Erro ao atualizar." });
     }
 });
 
-// DELETE — remover usuário
-router.delete("/deleteUsuario/:id", async (req, res) => {
+// 4. REMOVER USUÁRIO (DELETE)
+// Rota final será: DELETE /usuarios/deleteusuario/:id
+router.delete("/deleteusuario/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const [result] = await pool.execute("DELETE FROM usuario WHERE id = ?", [id]);
+
+        const [result] = await pool.execute(
+            'DELETE FROM usuario WHERE idUsuario = ?',
+            [id]
+        );
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: true, message: "Usuário não encontrado." });
+            return res.status(404).json({ error: true, message: "Usuário não encontrado para remoção." });
         }
 
-        res.status(200).json({ error: false, message: "Usuário removido com sucesso!" });
+        res.status(204).end(); // 204 No Content
     } catch (error) {
-        console.error("Erro ao deletar usuário:", error);
-        res.status(500).json({
-            error: true,
-            message: "Erro ao deletar usuário."
-        });
+        console.error("Erro ao remover usuário:", error);
+        res.status(500).json({ error: true, message: "Erro ao remover." });
     }
 });
 
 module.exports = router;
-
-

@@ -25,7 +25,7 @@ export default function Login({ navigation }) {
 
       if (res.status === 200 && res.data.token) {
         setToken(res.data.token);
-        navigation.replace("MenuApp");
+        navigation.replace("Home");
       }
 
     } catch (err) {

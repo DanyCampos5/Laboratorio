@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Login from './src/pages/Login';
 import Home from './src/pages/home';
+import Usuario from './src/pages/cadastroUsuario';
 import Paciente from './src/pages/cadastroPaciente';
 import ExamesStack from './src/pages/exames/ExamesStack';
 import LaudoStack from './src/pages/Laudo/LaudoStack';
@@ -24,6 +25,7 @@ function MenuApp() {
       }}
     >
       <Drawer.Screen name="Home" component={Home} options={{ drawerLabel: 'Início' }} />
+      <Drawer.Screen name="Home" component={Usuario} options={{ drawerLabel: 'Usuário' }} />
       <Drawer.Screen name="Exames" component={ExamesStack} options={{ drawerLabel: 'Exames' }} />
       <Drawer.Screen name="Paciente" component={Paciente} options={{ drawerLabel: 'Paciente' }} />
       <Drawer.Screen name="Tipagem" component={TipagemSanguinea} options={{ drawerLabel: 'Tipagem Sanguínea' }} />
@@ -38,7 +40,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
 
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="MenuApp" component={MenuApp} />
+        <Stack.Screen name="Home" component={Home} />
 
       </Stack.Navigator>
     </NavigationContainer>
