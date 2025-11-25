@@ -59,6 +59,15 @@ export default function Home() {
 
           <TouchableOpacity
             style={styles.button}
+            onPress={() => navigation.navigate("DataScience")}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="analytics" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>ANÁLISE DE DADOS</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
             onPress={() => navigation.navigate("CadastroUsuario")}
             activeOpacity={0.8}
           >

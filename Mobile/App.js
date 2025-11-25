@@ -11,6 +11,7 @@ import Paciente from './src/pages/cadastroPaciente';
 import ExamesStack from './src/pages/exames/ExamesStack';
 import LaudoStack from './src/pages/Laudo/LaudoStack';
 import TipagemSanguinea from './src/pages/LabImuno';
+import DataScience from './src/pages/DataScience';
 
 // 1. IMPORTANTE: Importe a tela de Cadastro aqui
 import CadastroUsuario from './src/pages/CadastroUsuarios';
@@ -34,6 +35,7 @@ function MenuApp() {
       <Drawer.Screen name="CadastroUsuario" component={CadastroUsuario} options={{ drawerLabel: 'Cadastro Usuário' }} />
       <Drawer.Screen name="Tipagem" component={TipagemSanguinea} options={{ drawerLabel: 'Tipagem Sanguínea' }} />
       <Drawer.Screen name="Laudo" component={LaudoStack} options={{ drawerLabel: 'Laudos' }} />
+      <Drawer.Screen name="DataScience" component={DataScience} options={{ drawerLabel: 'Análise de Dados' }} />
     </Drawer.Navigator>
   );
 }

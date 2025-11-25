@@ -117,3 +117,20 @@ plt.savefig(output_path)
 plt.close()
 
 print(f"✅ Gráfico de pizza salvo em: {output_path}")
+
+# --- Salvar estatísticas em JSON ---
+import json
+
+stats = {
+    "total_registros": int(len(df)),
+    "total_esterilizados": int(counts[1] if len(counts) > 1 else 0),
+    "total_nao_esterilizados": int(counts[0] if len(counts) > 0 else 0),
+    "acuracia_modelo": float(test_acc_xgb),
+    "melhores_parametros": random_search.best_params_
+}
+
+stats_path = os.path.join(output_dir, "estatisticas.json")
+with open(stats_path, "w") as f:
+    json.dump(stats, f, indent=4)
+
+print(f"✅ Estatísticas salvas em: {stats_path}")

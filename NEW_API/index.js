@@ -26,6 +26,10 @@ app.use('/exames', auth, examesRoutes);
 app.use('/pacientes', auth, pacientesRoutes);
 app.use('/laudo', laudoRoutes);
 
+// Servir arquivos estáticos do DataScience
+const path = require('path');
+app.use('/datascience', express.static(path.join(__dirname, 'DataScience', 'output')));
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

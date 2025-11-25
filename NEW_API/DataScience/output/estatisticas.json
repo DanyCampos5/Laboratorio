@@ -1,0 +1,13 @@
+{
+    "total_registros": 800,
+    "total_esterilizados": 468,
+    "total_nao_esterilizados": 332,
+    "acuracia_modelo": 0.6375,
+    "melhores_parametros": {
+        "n_estimators": 800,
+        "min_child_weight": 5,
+        "max_depth": 3,
+        "learning_rate": 0.01,
+        "gamma": 0.5
+    }
+}
