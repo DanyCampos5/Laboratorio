@@ -77,7 +77,7 @@ function MenuApp() {
       <Drawer.Screen name="Exames" component={ExamesStack} options={{ drawerLabel: 'Exames', drawerIcon: ({ color, size }) => <MaterialIcons name="description" size={size} color={color} /> }} />
       <Drawer.Screen name="Paciente" component={Paciente} options={{ drawerLabel: 'Paciente', drawerIcon: ({ color, size }) => <MaterialIcons name="person-add" size={size} color={color} /> }} />
       <Drawer.Screen name="CadastroUsuario" component={CadastroUsuario} options={{ drawerLabel: 'Cadastro Usuário', drawerIcon: ({ color, size }) => <MaterialIcons name="admin-panel-settings" size={size} color={color} /> }} />
-      <Drawer.Screen name="Tipagem" component={TipagemSanguinea} options={{ drawerLabel: 'Tipagem Sanguínea', drawerIcon: ({ color, size }) => <MaterialIcons name="bloodtype" size={size} color={color} /> }} />
+      <Drawer.Screen name="Laboratorio" component={TipagemSanguinea} options={{ drawerLabel: 'Laboratório', drawerIcon: ({ color, size }) => <MaterialIcons name="bloodtype" size={size} color={color} /> }} />
       <Drawer.Screen name="Laudo" component={LaudoStack} options={{ drawerLabel: 'Laudos', drawerIcon: ({ color, size }) => <MaterialIcons name="assignment" size={size} color={color} /> }} />
       <Drawer.Screen name="DataScience" component={DataScience} options={{ drawerLabel: 'Análise de Dados', drawerIcon: ({ color, size }) => <MaterialIcons name="analytics" size={size} color={color} /> }} />
     </Drawer.Navigator>

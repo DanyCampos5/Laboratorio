@@ -54,7 +54,7 @@ export default function Home() {
             activeOpacity={0.8}
           >
             <MaterialIcons name="bloodtype" size={26} color="#007BFF" />
-            <Text style={styles.buttonText}>TIPAGEM SANGUINEA</Text>
+            <Text style={styles.buttonText}>LABORATÓRIO</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
