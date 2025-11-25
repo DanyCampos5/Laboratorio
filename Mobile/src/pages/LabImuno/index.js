@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,67 +8,12 @@ import {
   TextInput,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-
-const MOCK_TIPAGEM_SANGUINEA = [
-  {
-    id: "1",
-    name: "Ana Silva",
-    antigeno: "A",
-    variante: "positivo",
-    antiA: "positivo",
-    antiB: "negativo",
-    antiD: "positivo",
-    teste: "negativo",
-    date: "2025-09-10",
-  },
-  {
-    id: "2",
-    name: "Bruno Costa",
-    antigeno: "O",
-    variante: "negativo",
-    antiA: "negativo",
-    antiB: "negativo",
-    antiD: "negativo",
-    teste: "negativo",
-    date: "2025-09-12",
-  },
-  {
-    id: "3",
-    name: "Carla Dias",
-    antigeno: "AB",
-    variante: "positivo",
-    antiA: "positivo",
-    antiB: "positivo",
-    antiD: "positivo",
-    teste: "positivo",
-    date: "2025-08-30",
-  },
-  {
-    id: "4",
-    name: "Daniel Alves",
-    antigeno: "B",
-    variante: "positivo",
-    antiA: "negativo",
-    antiB: "positivo",
-    antiD: "positivo",
-    teste: "negativo",
-    date: "2025-09-01",
-  },
-  {
-    id: "5",
-    name: "Elisa Martins",
-    antigeno: "O",
-    variante: "negativo",
-    antiA: "negativo",
-    antiB: "negativo",
-    antiD: "negativo",
-    teste: "negativo",
-    date: "2025-09-15",
-  },
-];
+import { API_BASE_URL } from "../../services/api";
 
 export default function TipagemSanguinea() {
   const [pesquisa, setPesquisa] = useState("");
+  const [lista, setLista] = useState([]);
+
   const [antigeno, setAntigeno] = useState("");
   const [variante, setVariante] = useState("");
   const [antiA, setAntiA] = useState("");
@@ -76,13 +21,64 @@ export default function TipagemSanguinea() {
   const [antiD, setAntiD] = useState("");
   const [teste, setTeste] = useState("");
 
-  const resultadosFiltrados = MOCK_TIPAGEM_SANGUINEA.filter((item) =>
-    item.name.toLowerCase().includes(pesquisa.toLowerCase())
+  async function carregarRegistros() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/labimuno/tipagem`);
+      const data = await response.json();
+      setLista(data);
+    } catch (error) {
+      console.log("Erro ao carregar registros:", error);
+    }
+  }
+
+  useEffect(() => {
+    carregarRegistros();
+  }, []);
+
+  async function salvarDados() {
+    if (!antigeno || !variante || !antiA || !antiB || !antiD || !teste) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+
+    const novoRegistro = {
+      antigeno,
+      variante,
+      antiA,
+      antiB,
+      antiD,
+      teste,
+    };
+
+    try {
+      await fetch(`${API_BASE_URL}/labimuno/tipagem`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(novoRegistro),
+      });
+
+      setAntigeno("");
+      setVariante("");
+      setAntiA("");
+      setAntiB("");
+      setAntiD("");
+      setTeste("");
+
+      // recarregar lista
+      carregarRegistros();
+    } catch (error) {
+      console.log("Erro ao salvar:", error);
+    }
+  }
+
+  const resultadosFiltrados = lista.filter((item) =>
+    item?.antigeno?.toLowerCase()?.includes(pesquisa.toLowerCase())
   );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
+
         <View style={styles.searchContainer}>
           <MaterialIcons
             name="search"
@@ -91,7 +87,7 @@ export default function TipagemSanguinea() {
             style={styles.searchIcon}
           />
           <TextInput
-            placeholder="Pesquisar por nome..."
+            placeholder="Pesquisar por antígeno..."
             style={styles.searchInput}
             value={pesquisa}
             onChangeText={setPesquisa}
@@ -106,6 +102,7 @@ export default function TipagemSanguinea() {
           value={antigeno}
           onChangeText={setAntigeno}
         />
+
         <TextInput
           placeholder="Variante (positivo/negativo)"
           style={styles.input}
@@ -135,6 +132,7 @@ export default function TipagemSanguinea() {
         />
 
         <Text style={styles.subtitle}>Teste direto da antiglobulina</Text>
+
         <TextInput
           placeholder="Resultado teste (positivo/negativo)"
           style={styles.input}
@@ -142,24 +140,31 @@ export default function TipagemSanguinea() {
           onChangeText={setTeste}
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={salvarDados}>
           <Text style={styles.buttonText}>Salvar Dados</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Lista */}
       <View style={styles.listContainer}>
         <Text style={styles.listTitle}>Registros de Tipagem</Text>
+
         {resultadosFiltrados.length > 0 ? (
           resultadosFiltrados.map((item) => (
             <View key={item.id} style={styles.listItem}>
-              <Text style={styles.listName}>{item.name}</Text>
+              <Text style={styles.listName}>Registro #{item.id}</Text>
+
               <Text style={styles.listInfo}>
                 {`Antígeno: ${item.antigeno} | Variante: ${item.variante}`}
               </Text>
+
               <Text style={styles.listInfo}>
                 {`Anti-A: ${item.antiA}, Anti-B: ${item.antiB}, Anti-D: ${item.antiD}`}
               </Text>
-              <Text style={styles.listDate}>Data: {item.date}</Text>
+
+              <Text style={styles.listDate}>
+                Data: {item.date?.substring(0, 10)}
+              </Text>
             </View>
           ))
         ) : (
@@ -186,10 +191,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
     elevation: 4,
   },
   searchContainer: {

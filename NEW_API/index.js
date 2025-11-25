@@ -7,6 +7,7 @@ const examesRoutes = require("./Controller/ExamesController/exame");
 const pacientesRoutes = require("./Controller/PacientesController/paciente");
 const laudoRoutes = require("./Controller/LaudoController/laudo");
 const loginRoutes = require("./Controller/LoginController/login");
+const labRoutes = require("./Controller/LabImuno/lab");
 
 const auth = require("./Controller/auth");
 
@@ -25,6 +26,7 @@ app.use('/usuarios', usuarioRoutes);
 app.use('/exames', auth, examesRoutes);
 app.use('/pacientes', auth, pacientesRoutes);
 app.use('/laudo', laudoRoutes);
+app.use('/labimuno', labRoutes);
 
 // Servir arquivos estáticos do DataScience
 const path = require('path');

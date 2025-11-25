@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { API_BASE_URL } from '../../services/api';
 
 export default function DataScience() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState(null);
 
-    const imageUrl = 'http://192.168.0.240:3000/datascience/grafico_pizza.png';
-    const statsUrl = 'http://192.168.0.240:3000/datascience/estatisticas.json';
+    const imageUrl = `${API_BASE_URL}/datascience/grafico_pizza.png`;
+    const statsUrl = `${API_BASE_URL}/datascience/estatisticas.json`;
     const uri = `${imageUrl}?t=${new Date().getTime()}`;
 
     useEffect(() => {
