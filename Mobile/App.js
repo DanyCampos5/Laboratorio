@@ -13,7 +13,7 @@ import LaudoStack from './src/pages/Laudo/LaudoStack';
 import TipagemSanguinea from './src/pages/LabImuno';
 
 // 1. IMPORTANTE: Importe a tela de Cadastro aqui
-import CadastroUsuario from './src/pages/cadastroUsuario'; 
+import CadastroUsuario from './src/pages/cadastroUsuario';
 
 const RootStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -31,6 +31,7 @@ function MenuApp() {
       <Drawer.Screen name="Home" component={Home} options={{ drawerLabel: 'Início' }} />
       <Drawer.Screen name="Exames" component={ExamesStack} options={{ drawerLabel: 'Exames' }} />
       <Drawer.Screen name="Paciente" component={Paciente} options={{ drawerLabel: 'Paciente' }} />
+      <Drawer.Screen name="CadastroUsuario" component={CadastroUsuario} options={{ drawerLabel: 'Cadastro Usuário' }} />
       <Drawer.Screen name="Tipagem" component={TipagemSanguinea} options={{ drawerLabel: 'Tipagem Sanguínea' }} />
       <Drawer.Screen name="Laudo" component={LaudoStack} options={{ drawerLabel: 'Laudos' }} />
     </Drawer.Navigator>
@@ -69,26 +70,26 @@ export default function App() {
   return (
     <NavigationContainer>
       <RootStack.Navigator initialRouteName={initialRoute}>
-        
+
         {/* Tela de Login */}
-        <RootStack.Screen 
-          name="Login" 
-          component={Login} 
-          options={{ headerShown: false }} 
+        <RootStack.Screen
+          name="Login"
+          component={Login}
+          options={{ headerShown: false }}
         />
 
         {/* 2. ADICIONE ISTO: A tela de Cadastro precisa estar no RootStack também */}
-        <RootStack.Screen 
-          name="CadastroUsuario" 
-          component={CadastroUsuario} 
-          options={{ title: 'Criar Conta' }} 
+        <RootStack.Screen
+          name="CadastroUsuario"
+          component={CadastroUsuario}
+          options={{ title: 'Criar Conta' }}
         />
 
         {/* O App Principal (Drawer) só é acessado após login */}
-        <RootStack.Screen 
-          name="MainApp" 
-          component={MenuApp} 
-          options={{ headerShown: false }} 
+        <RootStack.Screen
+          name="MainApp"
+          component={MenuApp}
+          options={{ headerShown: false }}
         />
 
       </RootStack.Navigator>

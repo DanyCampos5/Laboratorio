@@ -56,6 +56,15 @@ export default function Home() {
             <MaterialIcons name="people" size={26} color="#007BFF" />
             <Text style={styles.buttonText}>PACIENTES</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("CadastroUsuario")}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="person-add" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>CADASTRO USUÁRIO</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </LinearGradient>
