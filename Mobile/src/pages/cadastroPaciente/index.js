@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-  View, Text, TouchableOpacity, StyleSheet,
-  TextInput, FlatList, ActivityIndicator,
-} from "react-native";
+import {View, Text, TouchableOpacity, StyleSheet,TextInput, FlatList, ActivityIndicator} from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import api from "../../services/api"; // Usar o serviço de API configurado
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api"; 
 import { useNavigation } from "@react-navigation/native";
 
 const formatarData = (data) => {
@@ -31,7 +27,7 @@ const formatarDataParaInput = (data) => {
 };
 
 export default function Paciente() {
-  const API_URL = "/pacientes"; // A URL base está no api.js
+  const API_URL = "/pacientes"; 
   const [paciente, setPaciente] = useState({
     nome: "",
     telefone: "",
@@ -51,7 +47,6 @@ export default function Paciente() {
     buscarPacientes();
   }, []);
 
-  // A autenticação agora é tratada pelo interceptor do api.js
 
   const buscarPacientes = async () => {
     try {
@@ -228,7 +223,7 @@ const estilo = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f9f9f9',
-    paddingTop: 0, // Removido StatusBar.currentHeight para consistência
+    paddingTop: 0, 
   },
   searchContainer: {
     flexDirection: 'row',
