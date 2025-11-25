@@ -16,8 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-// URL da API para ambiente de desenvolvimento web
-const API_URL = 'http://localhost:3000/log/login';
+const API_URL = 'http://10.60.233.96:3000/log/login';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -47,7 +46,6 @@ export default function LoginScreen() {
       }
 
       navigation.replace('MainApp');
-      // Alert.alert('Sucesso!', message); // Optional: remove alert for smoother flow
 
     } catch (error) {
       let errorMessage = 'Ocorreu um erro desconhecido.';

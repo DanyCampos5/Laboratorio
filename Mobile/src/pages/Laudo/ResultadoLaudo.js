@@ -21,7 +21,6 @@ export default function ResultadoLaudo({ route }) {
         <View style={styles.card}>
           <Text style={styles.titulo}>Laudo Laboratorial</Text>
 
-          {/* Seção Paciente */}
           <View style={styles.section}>
             <Text style={styles.h2}>Identificação</Text>
             <Text style={styles.p}><Text style={styles.bold}>Nome: </Text>{paciente.nome}</Text>
@@ -33,7 +32,6 @@ export default function ResultadoLaudo({ route }) {
 
           <View style={styles.divider} />
 
-          {/* Seção Exames */}
           <View style={styles.section}>
             <Text style={styles.h2}>Resultados</Text>
             
@@ -43,7 +41,6 @@ export default function ResultadoLaudo({ route }) {
             <View style={styles.resultadoBox}>
                <Text style={styles.labelResultado}>RESULTADO:</Text>
                <Text style={styles.textoResultado}>
-                 {/* Exibe resultado formatado ou o texto puro do banco */}
                  {exames.grupoSanguineo} {exames.fatorRH}
                </Text>
             </View>
@@ -88,7 +85,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5, // Sombra para Android
+    elevation: 5, 
   },
   titulo: {
     fontSize: 22,

@@ -4,7 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   Button,
-  Platform, // <--- Adicionado para detectar onde o app está rodando
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -49,7 +49,6 @@ export default function BuscarLaudo({ navigation }) {
 
     } catch (err) {
       setError(err.message);
-      // Se estiver na Web, o Alert do React Native pode não aparecer tão bem, o console ajuda
       console.error("Erro ao buscar:", err); 
     } finally {
       setLoading(false);

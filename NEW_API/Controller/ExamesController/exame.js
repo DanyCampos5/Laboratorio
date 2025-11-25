@@ -84,7 +84,7 @@ router.get("/getpaciente", async (req, res) => {
         // Se um nome foi fornecido, adiciona a condição WHERE
         if (nome) {
             query += ' WHERE nome LIKE ?';
-            params.push(`%${nome}%`); // usando % para busca parcial do nome
+            params.push(`%${nome}%`);
         }
 
         const [rows] = await pool.execute(query, params);
@@ -107,7 +107,6 @@ router.get("/getpaciente", async (req, res) => {
     }
 })
 
-// rota para update nos exames
 // Rota para buscar exames de um paciente específico
 router.get("/getExames/:idPaciente", async (req, res) => {
     try {
@@ -119,9 +118,6 @@ router.get("/getExames/:idPaciente", async (req, res) => {
              ORDER BY dataExame DESC`,
             [idPaciente]
         );
-
-        // Se não houver exames, retorna um array vazio em vez de um erro.
-        // Isso simplifica o tratamento no front-end.
 
         res.status(200).json(rows);
 
@@ -181,7 +177,6 @@ router.delete("/deletarexame/:id", async (req, res) => {
         }
 
         console.log(`[BACK-END] Sucesso! ${result.affectedRows} linha(s) deletada(s).`);
-        // Garante que a resposta seja sempre um JSON, mesmo em caso de sucesso.
         res.status(200).json({ error: false, message: "Exame deletado com sucesso!" });
 
     } catch (error) {
