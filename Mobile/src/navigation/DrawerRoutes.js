@@ -10,6 +10,7 @@ import exames from "../pages/exames/index.js";
 import Lablmuno from "../pages/LabImuno/index.js";
 import AdicionarExames from "../pages/adicionarExames/index.js";
 import EditarExames from "../pages/editarExames/index.js"; // Adicionado
+import CadastroUsuario from "../pages/cadastroUsuario/index.js";
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -19,6 +20,7 @@ function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Usuario" component={CadastroUsuario} />
       <Stack.Screen name="Laudo" component={Laudo} />
       <Stack.Screen name="Exames" component={exames} />
       <Stack.Screen name="Paciente" component={cadastroPaciente} />
@@ -33,6 +35,7 @@ export default function DrawerRoutes() {
   return (
     <Drawer.Navigator initialRouteName="HomeStack">
       <Drawer.Screen name="HomeStack" component={HomeStack} options={{ title: "Início" }} />
+      <Drawer.Screen name="HomeStack" component={CadastroUsuario} options={{ title: "Usuário" }} />
       <Drawer.Screen name="cadastroPaciente" component={cadastroPaciente} options={{ title: "Cadastrar Paciente" }} />
       <Drawer.Screen name="Laudo" component={Laudo} options={{ title: "Buscar Laudo" }} />
       <Drawer.Screen name="exames" component={exames} options={{ title: "Exames" }} />
