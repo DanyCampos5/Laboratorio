@@ -89,12 +89,6 @@ export default function LoginScreen() {
       />
 
       <View style={styles.spacer} />
-
-      <Button
-        title="Cadastre-se"
-        onPress={() => navigation.navigate('CadastroUsuario')} // Assumindo que a rota se chama 'CadastroUsuario'
-        color="#007bff" // Cor diferente para destacar
-      />
     </View>
   );
 }

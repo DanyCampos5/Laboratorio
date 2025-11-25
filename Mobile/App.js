@@ -13,7 +13,7 @@ import LaudoStack from './src/pages/Laudo/LaudoStack';
 import TipagemSanguinea from './src/pages/LabImuno';
 
 // 1. IMPORTANTE: Importe a tela de Cadastro aqui
-import CadastroUsuario from './src/pages/cadastroUsuario';
+import CadastroUsuario from './src/pages/CadastroUsuarios';
 
 const RootStack = createStackNavigator();
 const Drawer = createDrawerNavigator();

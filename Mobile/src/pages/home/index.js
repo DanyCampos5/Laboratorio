@@ -50,11 +50,11 @@ export default function Home() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Paciente")}
+            onPress={() => navigation.navigate("Tipagem")}
             activeOpacity={0.8}
           >
-            <MaterialIcons name="people" size={26} color="#007BFF" />
-            <Text style={styles.buttonText}>PACIENTES</Text>
+            <MaterialIcons name="bloodtype" size={26} color="#007BFF" />
+            <Text style={styles.buttonText}>TIPAGEM SANGUINEA</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

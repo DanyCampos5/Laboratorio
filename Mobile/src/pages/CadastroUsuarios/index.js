@@ -1,11 +1,72 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, FlatList, ActivityIndicator, Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api"; // Importando o serviço de API centralizado
+
+// Componente extraído para evitar perda de foco
+const ListHeaderContent = ({
+    usuario,
+    setUsuario,
+    salvarUsuario,
+    editandoId,
+    busca,
+    setBusca
+}) => {
+    return (
+        <View onStartShouldSetResponder={() => true}>
+            {/* Formulário de cadastro */}
+            <View style={estilo.prancheta}>
+                <View style={estilo.header}>
+                    <Text style={estilo.titulo}>
+                        {editandoId ? "Editar Usuário" : "Cadastro de Usuário"}
+                    </Text>
+                </View>
+
+                {[
+                    { placeholder: "Nome completo", key: "nome" },
+                    { placeholder: "Telefone", key: "telefone" },
+                    { placeholder: "Email", key: "email" },
+                    { placeholder: "CPF", key: "cpf" },
+                    { placeholder: "Registro Profissional", key: "registroP" },
+                    { placeholder: "Cargo (Ex.: Biomédico)", key: "cargoF" },
+                    { placeholder: "Senha", key: "senha", secure: true },
+                ].map((campo) => (
+                    <TextInput
+                        key={campo.key}
+                        style={estilo.input}
+                        placeholder={campo.placeholder}
+                        secureTextEntry={campo.secure}
+                        value={usuario[campo.key]}
+                        onChangeText={(v) => setUsuario({ ...usuario, [campo.key]: v })}
+                        blurOnSubmit={false}
+                        autoCapitalize="none"
+                    />
+                ))}
+
+                <TouchableOpacity style={estilo.botao} onPress={salvarUsuario}>
+                    <Text style={estilo.textoBotao}>
+                        {editandoId ? "Atualizar" : "Salvar"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Barra de pesquisa */}
+            <View style={estilo.searchBox}>
+                <MaterialIcons name="search" size={24} color="#003366" />
+                <TextInput
+                    style={estilo.searchInput}
+                    placeholder="Pesquisar usuário"
+                    value={busca}
+                    onChangeText={setBusca}
+                />
+            </View>
+
+            <Text style={estilo.headerTitle}>Usuários Cadastrados</Text>
+        </View>
+    );
+};
 
 export default function CadastroUsuario() {
-    const API_URL = "http://192.168.100.54:3000";
 
     const [usuario, setUsuario] = useState({
         nome: "",
@@ -26,19 +87,14 @@ export default function CadastroUsuario() {
         buscarUsuarios();
     }, []);
 
-    const getAuth = async () => {
-        const token = await AsyncStorage.getItem("@token");
-        console.log("Token JWT obtido:", token);
-        return { headers: { Authorization: `Bearer ${token}` } };
-    };
-
     const buscarUsuarios = async () => {
         try {
             setCarregando(true);
-            const config = await getAuth();
-            const { data } = await axios.get(`${API_URL}/usuarios/getusuario`, config);
+            // O token é injetado automaticamente pelo interceptor do api.js
+            const { data } = await api.get(`/usuarios/getUsuarios`);
             setUsuarios(Array.isArray(data) ? data : []);
         } catch (error) {
+            console.error("Erro ao buscar usuários:", error);
             setUsuarios([]);
         } finally {
             setCarregando(false);
@@ -46,25 +102,34 @@ export default function CadastroUsuario() {
     };
 
     const salvarUsuario = async () => {
+        console.log("Tentando salvar usuário:", usuario);
         try {
-            if (!usuario.nome.trim() || !usuario.email.trim() || !usuario.senha.trim()) return;
-            const config = await getAuth();
+            if (!usuario.nome.trim() || !usuario.email.trim() || !usuario.senha.trim()) {
+                console.log("Campos obrigatórios faltando. Nome:", !!usuario.nome.trim(), "Email:", !!usuario.email.trim(), "Senha:", !!usuario.senha.trim());
+                Alert.alert("Erro", "Preencha os campos obrigatórios.");
+                return;
+            }
 
             if (editandoId) {
-                await axios.put(`${API_URL}/usuarios/updateusuario/${editandoId}`, usuario, config);
+                console.log("Atualizando usuário ID:", editandoId);
+                await api.put(`/usuarios/updateUsuario/${editandoId}`, usuario);
+                Alert.alert("Sucesso", "Usuário atualizado!");
             } else {
-                axios.post(`${API_URL}/usuarios/insertUsuario`, usuario, config);
-
+                console.log("Inserindo novo usuário");
+                await api.post(`/usuarios/insertUsuario`, usuario);
+                Alert.alert("Sucesso", "Usuário cadastrado!");
             }
 
             limparCampos();
             buscarUsuarios();
         } catch (error) {
-            console.log(error);
+            console.error("Erro ao salvar usuário:", error);
+            Alert.alert("Erro", "Não foi possível salvar o usuário.");
         }
     };
 
     const editarUsuario = (item) => {
+        console.log("Editando usuário:", item);
         setUsuario({
             nome: item.nome || "",
             telefone: item.telefone || "",
@@ -72,18 +137,20 @@ export default function CadastroUsuario() {
             cpf: item.cpf || "",
             registroP: item.registroP || "",
             cargoF: item.cargoF || "",
-            senha: "",
+            senha: "", // Senha geralmente não vem na listagem por segurança, ou vem hash
         });
-        setEditandoId(item.idUsuario);
+        setEditandoId(item.id);
     };
 
     const excluirUsuario = async (id) => {
+        console.log("Excluindo usuário ID:", id);
         try {
-            const config = await getAuth();
-            await axios.delete(`${API_URL}/usuarios/deleteusuario/${id}`, config);
+            await api.delete(`/usuarios/deleteUsuario/${id}`);
             buscarUsuarios();
+            Alert.alert("Sucesso", "Usuário excluído.");
         } catch (error) {
-            console.log(error);
+            console.error("Erro ao excluir:", error);
+            Alert.alert("Erro", "Não foi possível excluir o usuário.");
         }
     };
 
@@ -119,65 +186,10 @@ export default function CadastroUsuario() {
                     <MaterialIcons name="edit" size={28} color="#007bff" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => excluirUsuario(item.idUsuario)}>
+                <TouchableOpacity onPress={() => excluirUsuario(item.id)}>
                     <MaterialIcons name="delete" size={28} color="#ff4d4d" />
                 </TouchableOpacity>
             </View>
-        </View>
-    );
-
-    // Componente de Cabeçalho do FlatList (para o formulário e pesquisa)
-    const ListHeader = () => (
-        <View onStartShouldSetResponder={() => true}>
-            {/* Formulário de cadastro */}
-            <View style={estilo.prancheta}>
-                <View style={estilo.header}>
-                    <Text style={estilo.titulo}>
-                        {editandoId ? "Editar Usuário" : "Cadastro de Usuário"}
-                    </Text>
-                </View>
-
-                {[
-                    { placeholder: "Nome completo", key: "nome" },
-                    { placeholder: "Telefone", key: "telefone" },
-                    { placeholder: "Email", key: "email" },
-                    { placeholder: "CPF", key: "cpf" },
-                    { placeholder: "Registro Profissional", key: "registroP" },
-                    { placeholder: "Cargo (Ex.: Biomédico)", key: "cargoF" },
-                    { placeholder: "Senha", key: "senha", secure: true },
-                ].map((campo) => (
-                    <TextInput
-                        key={campo.key}
-                        style={estilo.input}
-                        placeholder={campo.placeholder}
-                        secureTextEntry={campo.secure}
-                        value={usuario[campo.key]}
-                        onChangeText={(v) => setUsuario({ ...usuario, [campo.key]: v })}
-                        blurOnSubmit={false}
-                        outoCapitalize="none"
-                        underlineColorAndroid="transparent"
-                    />
-                ))}
-
-                <TouchableOpacity style={estilo.botao} onPress={salvarUsuario}>
-                    <Text style={estilo.textoBotao}>
-                        {editandoId ? "Atualizar" : "Salvar"}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Barra de pesquisa */}
-            <View style={estilo.searchBox}>
-                <MaterialIcons name="search" size={24} color="#003366" />
-                <TextInput
-                    style={estilo.searchInput}
-                    placeholder="Pesquisar usuário"
-                    value={busca}
-                    onChangeText={setBusca}
-                />
-            </View>
-
-            <Text style={estilo.headerTitle}>Usuários Cadastrados</Text>
         </View>
     );
 
@@ -193,8 +205,17 @@ export default function CadastroUsuario() {
             {/* Lista de usuários */}
             <FlatList
                 data={filtrados}
-                keyExtractor={(item) => item.idUsuario?.toString()}
-                ListHeaderComponent={ListHeader} // O formulário e a pesquisa vão aqui
+                keyExtractor={(item) => item.id?.toString()}
+                ListHeaderComponent={
+                    <ListHeaderContent
+                        usuario={usuario}
+                        setUsuario={setUsuario}
+                        salvarUsuario={salvarUsuario}
+                        editandoId={editandoId}
+                        busca={busca}
+                        setBusca={setBusca}
+                    />
+                }
                 renderItem={renderItem}
                 ListEmptyComponent={
                     <Text style={{ textAlign: "center", color: "#777", marginTop: 20 }}>
