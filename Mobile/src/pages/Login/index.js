@@ -30,20 +30,23 @@ export default function LoginScreen() {
       });
 
       // 2. Processar a Resposta de Sucesso (Status 200)
-      const { token, message } = response.data;
-      
-      // 3. Armazenar o Token JWT
+      const { token, message, user } = response.data;
+
+      // 3. Armazenar o Token JWT e o Nome do Usuário
       await AsyncStorage.setItem('userToken', token);
-      
+      if (user && user.nome) {
+        await AsyncStorage.setItem('userName', user.nome);
+      }
+
       // 4. Navegar para a Tela Principal
       // Navega para o container do Drawer Navigator
-      navigation.replace('MainApp'); 
-      
+      navigation.replace('MainApp');
+
       Alert.alert('Sucesso!', message);
 
     } catch (error) {
       let errorMessage = 'Ocorreu um erro desconhecido.';
-      
+
       // Tratar erros HTTP (ex: 401 Credenciais inválidas)
       if (error.response) {
         // Se a API retornou um JSON com a mensagem de erro
@@ -52,7 +55,7 @@ export default function LoginScreen() {
         // Se a requisição foi feita, mas não houve resposta (ex: API offline)
         errorMessage = 'Não foi possível conectar ao servidor.';
       }
-      
+
       Alert.alert('Falha no Login', errorMessage);
       console.error('Erro de Login:', error);
 
