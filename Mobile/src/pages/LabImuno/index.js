@@ -6,14 +6,17 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Alert,
+  Platform,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { API_BASE_URL } from "../../services/api";
+import api from "../../services/api";
 
 export default function TipagemSanguinea() {
   const [pesquisa, setPesquisa] = useState("");
   const [lista, setLista] = useState([]);
 
+  // Form State
   const [antigeno, setAntigeno] = useState("");
   const [variante, setVariante] = useState("");
   const [antiA, setAntiA] = useState("");
@@ -21,13 +24,21 @@ export default function TipagemSanguinea() {
   const [antiD, setAntiD] = useState("");
   const [teste, setTeste] = useState("");
 
+  // Edit State
+  const [editMode, setEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   async function carregarRegistros() {
     try {
-      const response = await fetch(`${API_BASE_URL}/labimuno/tipagem`);
-      const data = await response.json();
-      setLista(data);
+      const response = await api.get("/labimuno/tipagem");
+      setLista(response.data);
     } catch (error) {
       console.log("Erro ao carregar registros:", error);
+      if (Platform.OS === 'web') {
+        alert("Não foi possível carregar os registros.");
+      } else {
+        Alert.alert("Erro", "Não foi possível carregar os registros.");
+      }
     }
   }
 
@@ -37,11 +48,15 @@ export default function TipagemSanguinea() {
 
   async function salvarDados() {
     if (!antigeno || !variante || !antiA || !antiB || !antiD || !teste) {
-      alert("Preencha todos os campos.");
+      if (Platform.OS === 'web') {
+        alert("Preencha todos os campos.");
+      } else {
+        Alert.alert("Erro", "Preencha todos os campos.");
+      }
       return;
     }
 
-    const novoRegistro = {
+    const dados = {
       antigeno,
       variante,
       antiA,
@@ -51,23 +66,104 @@ export default function TipagemSanguinea() {
     };
 
     try {
-      await fetch(`${API_BASE_URL}/labimuno/tipagem`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(novoRegistro),
-      });
+      if (editMode && editId) {
+        await api.put(`/labimuno/tipagem/${editId}`, dados);
+        if (Platform.OS === 'web') {
+          alert("Registro atualizado!");
+        } else {
+          Alert.alert("Sucesso", "Registro atualizado!");
+        }
+      } else {
+        await api.post("/labimuno/tipagem", dados);
+        if (Platform.OS === 'web') {
+          alert("Registro salvo!");
+        } else {
+          Alert.alert("Sucesso", "Registro salvo!");
+        }
+      }
 
-      setAntigeno("");
-      setVariante("");
-      setAntiA("");
-      setAntiB("");
-      setAntiD("");
-      setTeste("");
-
-      // recarregar lista
+      limparFormulario();
       carregarRegistros();
     } catch (error) {
       console.log("Erro ao salvar:", error);
+      if (Platform.OS === 'web') {
+        alert("Ocorreu um erro ao salvar.");
+      } else {
+        Alert.alert("Erro", "Ocorreu um erro ao salvar.");
+      }
+    }
+  }
+
+  function limparFormulario() {
+    setAntigeno("");
+    setVariante("");
+    setAntiA("");
+    setAntiB("");
+    setAntiD("");
+    setTeste("");
+    setEditMode(false);
+    setEditId(null);
+  }
+
+  function handleEdit(item) {
+    setAntigeno(item.antigeno);
+    setVariante(item.variante);
+    setAntiA(item.antiA);
+    setAntiB(item.antiB);
+    setAntiD(item.antiD);
+    setTeste(item.teste);
+    setEditMode(true);
+    setEditId(item.id);
+  }
+
+  function handleDelete(id) {
+    console.log("handleDelete chamado com id:", id);
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm("Tem certeza que deseja excluir este registro?");
+      if (confirm) {
+        deleteItem(id);
+      }
+    } else {
+      Alert.alert(
+        "Excluir",
+        "Tem certeza que deseja excluir este registro?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Excluir",
+            style: "destructive",
+            onPress: () => deleteItem(id),
+          },
+        ]
+      );
+    }
+  }
+
+  async function deleteItem(id) {
+    try {
+      console.log(`Tentando excluir: /labimuno/tipagem/${id}`);
+      const response = await api.delete(`/labimuno/tipagem/${id}`);
+      console.log("Resposta do delete:", response.status, response.data);
+
+      if (Platform.OS === 'web') {
+        alert("Registro excluído!");
+      } else {
+        Alert.alert("Sucesso", "Registro excluído!");
+      }
+      carregarRegistros();
+    } catch (error) {
+      console.log("Erro ao excluir:", error);
+      if (error.response) {
+        console.log("Dados do erro:", error.response.data);
+        console.log("Status do erro:", error.response.status);
+      }
+
+      if (Platform.OS === 'web') {
+        alert("Falha ao excluir registro.");
+      } else {
+        Alert.alert("Erro", "Falha ao excluir registro.");
+      }
     }
   }
 
@@ -94,7 +190,9 @@ export default function TipagemSanguinea() {
           />
         </View>
 
-        <Text style={styles.title}>Tipagem Sanguínea</Text>
+        <Text style={styles.title}>
+          {editMode ? "Editar Tipagem" : "Nova Tipagem Sanguínea"}
+        </Text>
 
         <TextInput
           placeholder="Antígeno (A, B, AB, O)"
@@ -140,9 +238,25 @@ export default function TipagemSanguinea() {
           onChangeText={setTeste}
         />
 
-        <TouchableOpacity style={styles.button} onPress={salvarDados}>
-          <Text style={styles.buttonText}>Salvar Dados</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          {editMode && (
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={limparFormulario}
+            >
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={[styles.button, styles.saveButton, editMode && styles.updateButton]}
+            onPress={salvarDados}
+          >
+            <Text style={styles.buttonText}>
+              {editMode ? "Atualizar" : "Salvar Dados"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Lista */}
@@ -152,19 +266,37 @@ export default function TipagemSanguinea() {
         {resultadosFiltrados.length > 0 ? (
           resultadosFiltrados.map((item) => (
             <View key={item.id} style={styles.listItem}>
-              <Text style={styles.listName}>Registro #{item.id}</Text>
+              <View style={styles.listItemContent}>
+                <Text style={styles.listName}>Registro #{item.id}</Text>
 
-              <Text style={styles.listInfo}>
-                {`Antígeno: ${item.antigeno} | Variante: ${item.variante}`}
-              </Text>
+                <Text style={styles.listInfo}>
+                  {`Antígeno: ${item.antigeno} | Variante: ${item.variante}`}
+                </Text>
 
-              <Text style={styles.listInfo}>
-                {`Anti-A: ${item.antiA}, Anti-B: ${item.antiB}, Anti-D: ${item.antiD}`}
-              </Text>
+                <Text style={styles.listInfo}>
+                  {`Anti-A: ${item.antiA}, Anti-B: ${item.antiB}, Anti-D: ${item.antiD}`}
+                </Text>
 
-              <Text style={styles.listDate}>
-                Data: {item.date?.substring(0, 10)}
-              </Text>
+                <Text style={styles.listDate}>
+                  Data: {item.date?.substring(0, 10)}
+                </Text>
+              </View>
+
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  onPress={() => handleEdit(item)}
+                  style={styles.iconButton}
+                >
+                  <MaterialIcons name="edit" size={24} color="#007BFF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                  style={styles.iconButton}
+                >
+                  <MaterialIcons name="delete" size={24} color="#FF3B30" />
+                </TouchableOpacity>
+              </View>
             </View>
           ))
         ) : (
@@ -234,12 +366,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
-  button: {
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 20,
-    backgroundColor: "#1976D2",
+    gap: 10,
+  },
+  button: {
+    flex: 1,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
+  },
+  saveButton: {
+    backgroundColor: "#1976D2",
+  },
+  updateButton: {
+    backgroundColor: "#2e7d32", // Green for update
+  },
+  cancelButton: {
+    backgroundColor: "#757575",
   },
   buttonText: {
     color: "#fff",
@@ -264,6 +410,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#ddd",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  listItemContent: {
+    flex: 1,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  iconButton: {
+    padding: 8,
   },
   listName: {
     fontSize: 16,

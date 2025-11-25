@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native'; // Para navegação
+import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 // URL da API para ambiente de desenvolvimento web
 const API_URL = 'http://localhost:3000/log/login';
@@ -13,7 +25,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  // Função Principal de Login
   const handleLogin = async () => {
     if (!email || !senha) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
@@ -23,36 +34,27 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      // 1. Fazer a Requisição para a API
       const response = await axios.post(API_URL, {
         email: email,
         senha: senha,
       });
 
-      // 2. Processar a Resposta de Sucesso (Status 200)
       const { token, message, user } = response.data;
 
-      // 3. Armazenar o Token JWT e o Nome do Usuário
       await AsyncStorage.setItem('userToken', token);
       if (user && user.nome) {
         await AsyncStorage.setItem('userName', user.nome);
       }
 
-      // 4. Navegar para a Tela Principal
-      // Navega para o container do Drawer Navigator
       navigation.replace('MainApp');
-
-      Alert.alert('Sucesso!', message);
+      // Alert.alert('Sucesso!', message); // Optional: remove alert for smoother flow
 
     } catch (error) {
       let errorMessage = 'Ocorreu um erro desconhecido.';
 
-      // Tratar erros HTTP (ex: 401 Credenciais inválidas)
       if (error.response) {
-        // Se a API retornou um JSON com a mensagem de erro
         errorMessage = error.response.data.message || 'Erro de servidor.';
       } else if (error.request) {
-        // Se a requisição foi feita, mas não houve resposta (ex: API offline)
         errorMessage = 'Não foi possível conectar ao servidor.';
       }
 
@@ -65,59 +67,153 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Acesso ao Sistema</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <MaterialIcons name="science" size={50} color="#007BFF" />
+            <Text style={styles.title}>Laboratório</Text>
+            <Text style={styles.subtitle}>Acesse sua conta</Text>
+          </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+          <View style={styles.inputContainer}>
+            <MaterialIcons name="email" size={20} color="#666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#999"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-      />
+          <View style={styles.inputContainer}>
+            <MaterialIcons name="lock" size={20} color="#666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Senha"
+              placeholderTextColor="#999"
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry
+            />
+          </View>
 
-      <Button
-        title={loading ? "Carregando..." : "Entrar"}
-        onPress={handleLogin}
-        disabled={loading}
-      />
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>ENTRAR</Text>
+            )}
+          </TouchableOpacity>
 
-      <View style={styles.spacer} />
-    </View>
+          <TouchableOpacity style={styles.forgotButton}>
+            <Text style={styles.forgotText}>Esqueceu a senha?</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F7FB',
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
+  },
+  card: {
     backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 30,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
+    color: '#333',
+    marginTop: 10,
   },
-  spacer: {
-    height: 10, // Espaçamento entre os botões
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F2F5',
+    borderRadius: 12,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    height: 55,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    flex: 1,
+    height: '100%',
+    fontSize: 16,
+    color: '#333',
+  },
+  button: {
+    backgroundColor: '#007BFF',
+    borderRadius: 12,
+    height: 55,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#007BFF',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  forgotButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  forgotText: {
+    color: '#007BFF',
+    fontSize: 14,
   },
 });

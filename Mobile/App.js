@@ -56,7 +56,6 @@ function CustomDrawerContent(props) {
           label="Sair"
           icon={({ color, size }) => <MaterialIcons name="logout" size={size} color={color} />}
           onPress={handleLogout}
-          labelStyle={{ marginLeft: -16 }}
         />
       </View>
     </DrawerContentScrollView>
